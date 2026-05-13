@@ -1,0 +1,6 @@
+# 원본 사진은 개인정보 보호를 위해 git에서 제외
+assets/photos/
+
+# OS 파일
+.DS_Store
+Thumbs.db
