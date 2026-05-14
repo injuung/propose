@@ -1,9 +1,6 @@
 # 원본 사진은 개인정보 보호를 위해 git에서 제외
 assets/photos/
 
-# 스크립트 폴더 (API 키 포함) - 절대 git에 올리면 안 됨
-scripts/
-
 # OS 파일
 .DS_Store
 Thumbs.db
