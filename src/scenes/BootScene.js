@@ -21,9 +21,9 @@ class BootScene extends Phaser.Scene {
         this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 0x000000, 0.45);
 
         // 제목
-        this.add.text(WIDTH / 2, HEIGHT / 2 - 70, '우리의 이야기', {
+        this.add.text(WIDTH / 2, HEIGHT / 2 - 70, '우리가 함께하는 새로운 시작', {
             fontFamily: 'serif',
-            fontSize:   '72px',
+            fontSize:   '56px',
             fill:       '#ffffff',
             fontStyle:  'italic',
             stroke:     '#000000',

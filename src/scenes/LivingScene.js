@@ -20,6 +20,9 @@ class LivingScene extends Phaser.Scene {
             this.dialog.start(GAME_CONFIG.DIALOGUES.living_hint, () => {});
         });
 
+        // 화면 클릭 시 대사 진행
+        this.input.on('pointerdown', () => this.dialog.advance());
+
         if (GAME_CONFIG.DEBUG_MODE) this._buildDebugUI();
     }
 
