@@ -28,7 +28,7 @@ class BootScene extends Phaser.Scene {
         btn.on('pointerdown', () => {
             this.cameras.main.fadeOut(400, 0, 0, 0);
             this.cameras.main.once('camerafadeoutcomplete', () => {
-                this.scene.start('PreloadScene');
+                this.scene.start('QuizScene');
             });
         });
     }

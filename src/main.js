@@ -13,6 +13,7 @@ new Phaser.Game({
     },
     scene: [
         BootScene,
+        QuizScene,
         PreloadScene,
         RoomScene,
         KitchenScene,

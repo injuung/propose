@@ -29,17 +29,17 @@ const GAME_CONFIG = {
         backgrounds: {
             room: {
                 key:     'bg_room',
-                url:     '',          // 로컬 경로 (미사용시 비워두기)
-                driveId: '',          // Google Drive 파일 ID
+                url:     'assets/backgrounds/bg_room.png',
+                driveId: '',
             },
             kitchen: {
                 key:     'bg_kitchen',
-                url:     '',
+                url:     'assets/backgrounds/bg_kitchen.png',
                 driveId: '',
             },
             living: {
                 key:     'bg_living',
-                url:     '',
+                url:     'assets/backgrounds/bg_living.png',
                 driveId: '',
             },
         },
@@ -112,6 +112,24 @@ const GAME_CONFIG = {
             },
         },
 
+    },
+
+    // =========================================================================
+    // [퀴즈 설정]
+    // question : 화면에 표시될 질문
+    // choices  : 보기 배열 (표시 순서 유지)
+    // answer   : 정답 텍스트 (choices 중 하나와 정확히 일치해야 함)
+    // wrong_msg: 오답 시 표시 메시지
+    // =========================================================================
+    QUIZ: {
+        question:  '우리의 시작',
+        choices: [
+            '재즈바',
+            '치킨집',
+            '와인샵',
+        ],
+        answer:    '재즈바',
+        wrong_msg: '다시 생각해봐... 💭',
     },
 
     // =========================================================================
