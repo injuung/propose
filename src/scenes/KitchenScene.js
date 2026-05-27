@@ -48,7 +48,7 @@ class KitchenScene extends Phaser.Scene {
             this._tapHint.setVisible(false);
             this.dialog.start(
                 GAME_CONFIG.DIALOGUES.kitchen_intro,
-                () => this._goToLiving(),
+                () => this._showMoveButton('거실로 이동 →', () => this._goToLiving()),
                 (s) => this._onSpeakerChange(s)
             );
         });
@@ -172,12 +172,50 @@ class KitchenScene extends Phaser.Scene {
         }
     }
 
-    _goToLiving() {
-        this.time.delayedCall(300, () => {
-            this.cameras.main.fadeOut(500, 0, 0, 0);
-            this.cameras.main.once('camerafadeoutcomplete', () => {
-                this.scene.start('LivingScene');
+    // 대화 종료 후 좌상단에 이동 버튼 표시
+    _showMoveButton(label, onTap) {
+        const btn = this.add.text(18, 24, `🚶 ${label}`, {
+            fontFamily:      'sans-serif',
+            fontSize:        '17px',
+            fill:            '#ffffff',
+            backgroundColor: '#00000099',
+            padding:         { x: 14, y: 9 },
+            stroke:          '#000000',
+            strokeThickness: 2,
+        }).setDepth(60).setAlpha(0).setInteractive({ useHandCursor: true });
+
+        this.tweens.add({
+            targets: btn, alpha: 1, duration: 400,
+            onComplete: () => {
+                this.tweens.add({
+                    targets: btn, alpha: 0.6,
+                    duration: 750, yoyo: true, repeat: -1,
+                });
+            },
+        });
+
+        btn.on('pointerover', () => {
+            this.tweens.killTweensOf(btn);
+            btn.setAlpha(1).setStyle({ fill: '#f1c40f' });
+        });
+        btn.on('pointerout', () => {
+            btn.setStyle({ fill: '#ffffff' });
+            this.tweens.add({ targets: btn, alpha: 0.6, duration: 750, yoyo: true, repeat: -1 });
+        });
+        btn.on('pointerdown', (pointer, lx, ly, event) => {
+            event.stopPropagation();
+            btn.disableInteractive();
+            this.tweens.killTweensOf(btn);
+            this.tweens.add({ targets: btn, alpha: 0, duration: 150,
+                onComplete: () => { btn.destroy(); onTap(); }
             });
+        });
+    }
+
+    _goToLiving() {
+        this.cameras.main.fadeOut(500, 0, 0, 0);
+        this.cameras.main.once('camerafadeoutcomplete', () => {
+            this.scene.start('LivingScene');
         });
     }
 
