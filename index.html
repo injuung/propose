@@ -5,30 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#000000">
     <title>우리가 함께하는 새로운 시작</title>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"></script>
     <style>
-        *, *::before, *::after { box-sizing: border-box; }
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            /* 갤럭시 S24 punch-hole/상단바 safe-area 대응 */
-            padding-top: env(safe-area-inset-top);
-            padding-bottom: env(safe-area-inset-bottom);
-            background-color: #000;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html {
+            /* 브라우저 주소창 포함 전체 높이 */
+            height: -webkit-fill-available;
+        }
+        body {
+            /* 화면에 고정 — 스크롤·패딩 없이 정확히 뷰포트 전체 */
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
             overflow: hidden;
+            background: #000;
             display: flex;
             justify-content: center;
             align-items: center;
-            /* 세로 방향 고정 */
             touch-action: none;
         }
         canvas {
             display: block;
-            /* 터치 하이라이트 제거 */
             -webkit-tap-highlight-color: transparent;
             outline: none;
         }

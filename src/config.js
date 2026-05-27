@@ -1,32 +1,28 @@
 // =============================================================================
 // config.js : 게임의 모든 설정값, 경로, 대사를 관리합니다
-// 이 파일만 수정해도 대부분의 변경이 가능합니다
+// ★ 화면 크기는 실행 시 window.innerWidth/Height 로 자동 감지됩니다
 // =============================================================================
+
+// 실제 화면 크기를 먼저 읽어 둡니다
+const _W = window.innerWidth;
+const _H = window.innerHeight;
+
 const GAME_CONFIG = {
 
     DEBUG_MODE: false,  // true: 클릭 좌표 및 핫스팟 시각화
 
-    // 갤럭시 S24 세로 기준 (576×1024 배경 이미지 비율과 동일)
-    WIDTH:  450,
-    HEIGHT: 940,
+    // 실제 기기 뷰포트 크기 (갤럭시 S24·아이폰 등 어떤 폰이든 자동 맞춤)
+    WIDTH:  _W,
+    HEIGHT: _H,
 
     // =========================================================================
     // [에셋 설정]
-    //
-    // ★ 사용법: driveId 와 url 중 하나만 입력하면 됩니다
-    //
-    //   - driveId : Google Drive 파일 ID 입력 (url 은 '' 로 비워두기)
-    //               파일 ID = 공유 링크의 /file/d/[여기]/view 부분
-    //
-    //   - url     : 로컬 파일 경로 입력 (driveId 는 '' 로 비워두기)
-    //               예) 'assets/backgrounds/bg_room.png'
-    //
-    //   driveId 가 있으면 Google Drive가 우선 적용됩니다
+    // ★ driveId 와 url 중 하나만 입력
+    //   driveId : Google Drive 파일 ID  (url 은 '' 로 비워두기)
+    //   url     : 로컬 파일 경로        (driveId 는 '' 로 비워두기)
     // =========================================================================
     ASSETS: {
 
-        // --- 배경 이미지 ---
-        // ※ 원본 사진 보관: assets/photos/rooms/
         backgrounds: {
             room: {
                 key:     'bg_room',
@@ -45,71 +41,34 @@ const GAME_CONFIG = {
             },
         },
 
-        // --- 캐릭터 스프라이트 ---
-        // ※ 원본 사진 보관: assets/photos/characters/
         characters: {
-            male_idle: {
-                key:     'male_idle',
-                url:     '',
-                driveId: '',
-            },
-            male_cook: {
-                key:     'male_cook',
-                url:     '',
-                driveId: '',
-            },
-            female_idle: {
-                key:     'female_idle',
-                url:     '',
-                driveId: '',
-            },
-            couple_hug: {
-                key:     'couple_hug',
-                url:     '',
-                driveId: '',
-            },
+            male_idle:   { key: 'male_idle',   url: '', driveId: '' },
+            male_cook:   { key: 'male_cook',   url: '', driveId: '' },
+            female_idle: { key: 'female_idle', url: '', driveId: '' },
+            couple_hug:  { key: 'couple_hug',  url: '', driveId: '' },
         },
 
-        // --- 인터랙션 오브젝트 이미지 ---
         objects: {
-            perfume: {
-                key:     'perfume',
-                url:     '',
-                driveId: '',          // [이스터에그] 방 향수
-            },
-            fridge_photo: {
-                key:     'fridge_photo',
-                url:     '',
-                driveId: '',          // [이스터에그] 냉장고 위 사진
-            },
+            perfume:      { key: 'perfume',      url: '', driveId: '' },
+            fridge_photo: { key: 'fridge_photo', url: '', driveId: '' },
         },
 
-        // --- 오디오 ---
-        // ※ Google Drive 오디오: 파일 크기가 작을수록 안정적으로 로드됩니다
         audio: {
             bgm: {
-                key:     'bgm',
-                url:     '',
-                driveId: '',          // 배경음악 (mp3 권장)
-                volume:  0.3,
-                loop:    true,
+                key: 'bgm', url: '', driveId: '',
+                volume: 0.3, loop: true,
             },
             perfume_voice: {
-                key:     'perfume_voice',
-                url:     '',
-                driveId: '',          // [이스터에그] 향수 클릭 시 음성 (mp3 권장)
-                volume:  1.0,
-                loop:    false,
+                key: 'perfume_voice', url: '', driveId: '',
+                volume: 1.0, loop: false,
             },
         },
 
-        // --- 영상 ---
-        // ※ Google Drive 영상은 iframe으로 재생됩니다 (CORS 우회)
         video: {
             propose: {
                 key:     'propose_video',
-                url:     '',          // 로컬 경로 (미사용시 비워두기)
-                driveId: '',          // Google Drive 파일 ID (권장)
+                url:     '',
+                driveId: '',
             },
         },
 
@@ -117,10 +76,6 @@ const GAME_CONFIG = {
 
     // =========================================================================
     // [퀴즈 설정]
-    // question : 화면에 표시될 질문
-    // choices  : 보기 배열 (표시 순서 유지)
-    // answer   : 정답 텍스트 (choices 중 하나와 정확히 일치해야 함)
-    // wrong_msg: 오답 시 표시 메시지
     // =========================================================================
     QUIZ: {
         question:  '우리의 시작',
@@ -135,13 +90,11 @@ const GAME_CONFIG = {
 
     // =========================================================================
     // [대사 설정]
-    // ★ 대사 추가: 배열에 문자열을 넣으면 순서대로 표시됩니다
     // ★ 마지막 줄이 끝나면 자동으로 다음 씬으로 이동합니다
     // =========================================================================
     DIALOGUES: {
 
-        // Stage 1 (침실) - 입장 대사
-        // ※ 마지막 줄 이후 → 부엌 씬으로 자동 이동
+        // Stage 1 (침실) — 마지막 줄 후 부엌 이동
         room_intro: [
             "오늘 하루도 수고했어.",
             "응... 네 옆에 누워있으니까 다 풀린다.",
@@ -150,8 +103,7 @@ const GAME_CONFIG = {
             "이제 밥먹으러 가자.",
         ],
 
-        // Stage 2 (부엌) - 요리 대사
-        // ※ 마지막 줄 이후 → 거실 씬으로 자동 이동
+        // Stage 2 (부엌) — 마지막 줄 후 거실 이동
         kitchen_intro: [
             "오늘은 내가 해줄게.",
             "진짜? 뭐 만들어줄 거야?",
@@ -161,12 +113,12 @@ const GAME_CONFIG = {
             "야구볼래?",
         ],
 
-        // Stage 3 (거실) - 입장 시 TV 힌트 대사
+        // Stage 3 (거실) — TV 힌트
         living_hint: [
             "저기... TV 한번 켜볼래?",
         ],
 
-        // 이스터에그: 향수 클릭 (음성과 함께 표시됨)
+        // 이스터에그: 향수
         room_perfume: [
             "이 향수 냄새... 처음 만났을 때랑 똑같아.",
         ],
@@ -174,33 +126,37 @@ const GAME_CONFIG = {
     },
 
     // =========================================================================
-    // [오브젝트 위치 설정]
-    // 배경 이미지가 바뀌면 아래 좌표를 조정하세요
-    // x, y: 화면 좌표 (좌상단 기준, 1280×720)
-    // w, h: 핫스팟(클릭 영역) 크기
-    // =========================================================================
-    // =========================================================================
-    // [오브젝트 위치 설정] — 갤럭시 S24 세로(450×940) 기준
-    // 배경 이미지가 달라지면 아래 좌표를 조정하세요
+    // [오브젝트 위치 설정] — 화면 비율(%) 기반으로 자동 계산
+    // 배경 이미지가 바뀌면 아래 비율값을 조정하세요
     // =========================================================================
     POSITIONS: {
 
         room: {
-            male:    { x: 160,  y: 780 },
-            female:  { x: 290,  y: 780 },
-            hug:     { x: 225,  y: 780 },
-            perfume: { x: 370,  y: 480 },
+            male:    { x: Math.round(_W * 0.36), y: Math.round(_H * 0.83) },
+            female:  { x: Math.round(_W * 0.64), y: Math.round(_H * 0.83) },
+            hug:     { x: Math.round(_W * 0.50), y: Math.round(_H * 0.83) },
+            perfume: { x: Math.round(_W * 0.82), y: Math.round(_H * 0.51) },
         },
 
         kitchen: {
-            male_cook:    { x: 225,  y: 780 },
-            fridge_photo: { x:  55,  y: 480 },
-            pot_hotspot:  { x: 200,  y: 660, w: 200, h: 150 },
+            male_cook:    { x: Math.round(_W * 0.50), y: Math.round(_H * 0.83) },
+            fridge_photo: { x: Math.round(_W * 0.12), y: Math.round(_H * 0.51) },
+            pot_hotspot: {
+                x: Math.round(_W * 0.44),
+                y: Math.round(_H * 0.70),
+                w: Math.round(_W * 0.44),
+                h: Math.round(_H * 0.16),
+            },
         },
 
         living: {
-            // TV 화면 클릭 영역 (bg_living 기준)
-            tv_hotspot: { x: 225, y: 390, w: 340, h: 210 },
+            // TV 화면 클릭 영역
+            tv_hotspot: {
+                x: Math.round(_W * 0.50),
+                y: Math.round(_H * 0.37),
+                w: Math.round(_W * 0.78),
+                h: Math.round(_H * 0.24),
+            },
         },
 
     },
