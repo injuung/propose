@@ -125,45 +125,26 @@ class LivingScene extends Phaser.Scene {
     _buildTVHotspot() {
         const pos = GAME_CONFIG.POSITIONS.living.tv_hotspot;
 
+        // 보이지 않는 클릭 영역만 생성 (라인·라벨 없음)
         const tvZone = this.add.zone(pos.x, pos.y, pos.w, pos.h)
             .setDepth(5).setInteractive({ useHandCursor: true });
-
-        this.tvHint = this.add.rectangle(pos.x, pos.y, pos.w, pos.h)
-            .setDepth(5)
-            .setStrokeStyle(3, 0xf1c40f, 0.9)
-            .setFillStyle(0xf1c40f, 0.06);
-
-        this.tweens.add({
-            targets: this.tvHint, alpha: 0.2,
-            duration: 900, yoyo: true, repeat: -1,
-        });
-
-        this.tvLabel = this.add.text(pos.x, pos.y - pos.h / 2 - 16, '▶ TV 켜기', {
-            fontFamily:      'sans-serif',
-            fontSize:        '20px',
-            fill:            '#f1c40f',
-            stroke:          '#000000',
-            strokeThickness: 4,
-        }).setOrigin(0.5).setDepth(6);
 
         tvZone.on('pointerdown', (pointer, lx, ly, event) => {
             event.stopPropagation();
             if (!this.dialog.isActive) this._playVideo();
         });
-        tvZone.on('pointerover', () => {
-            this.tvHint.setStrokeStyle(3, 0xffffff, 1);
-            this.tvLabel.setStyle({ fill: '#ffffff' });
-        });
-        tvZone.on('pointerout', () => {
-            this.tvHint.setStrokeStyle(3, 0xf1c40f, 0.9);
-            this.tvLabel.setStyle({ fill: '#f1c40f' });
-        });
+
+        // DEBUG_MODE 에서만 영역 시각화
+        if (GAME_CONFIG.DEBUG_MODE) {
+            this.add.rectangle(pos.x, pos.y, pos.w, pos.h)
+                .setDepth(99).setStrokeStyle(2, 0xff0000, 1).setFillStyle(0xff0000, 0.1);
+            this.add.text(pos.x, pos.y - pos.h / 2 - 12, '▶ TV 영역', {
+                fontFamily: 'monospace', fontSize: '14px', fill: '#ff0000',
+            }).setOrigin(0.5).setDepth(100);
+        }
     }
 
     _playVideo() {
-        this.tvHint.destroy();
-        this.tvLabel.destroy();
-
         const cfg = GAME_CONFIG.ASSETS.video.propose;
 
         if (cfg.driveId || (cfg.url && this.cache.video.exists(cfg.key))) {

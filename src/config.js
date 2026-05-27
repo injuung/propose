@@ -51,6 +51,14 @@ const GAME_CONFIG = {
         objects: {
             perfume:      { key: 'perfume',      url: '', driveId: '' },
             fridge_photo: { key: 'fridge_photo', url: '', driveId: '' },
+
+            // ★ 냉장고 사진 클릭 시 전체화면에 표시될 사진
+            //   url 또는 driveId 중 하나를 채워 넣으세요
+            fridge_memory: {
+                key:     'fridge_memory',
+                url:     '',        // 예: 'assets/photos/memory.png'
+                driveId: '',        // 또는 Google Drive 파일 ID
+            },
         },
 
         audio: {
@@ -149,8 +157,17 @@ const GAME_CONFIG = {
         },
 
         kitchen: {
-            male_cook:    { x: Math.round(_W * 0.50), y: Math.round(_H * 0.83) },
-            fridge_photo: { x: Math.round(_W * 0.12), y: Math.round(_H * 0.51) },
+            male_cook: { x: Math.round(_W * 0.50), y: Math.round(_H * 0.83) },
+
+            // 냉장고에 붙은 사진 클릭 영역 — 실제 이미지 위치에 맞게 조정
+            // DEBUG_MODE: true 로 설정하면 좌표를 확인할 수 있습니다
+            fridge_photo: {
+                x: Math.round(_W * 0.13),
+                y: Math.round(_H * 0.47),
+                w: Math.round(_W * 0.13),
+                h: Math.round(_H * 0.09),
+            },
+
             pot_hotspot: {
                 x: Math.round(_W * 0.44),
                 y: Math.round(_H * 0.70),
@@ -160,12 +177,13 @@ const GAME_CONFIG = {
         },
 
         living: {
-            // TV 화면 클릭 영역
+            // TV 화면 클릭 영역 — 실제 이미지 내 TV 위치에 맞게 조정
+            // DEBUG_MODE: true 로 설정하면 좌표를 확인할 수 있습니다
             tv_hotspot: {
                 x: Math.round(_W * 0.50),
-                y: Math.round(_H * 0.37),
-                w: Math.round(_W * 0.78),
-                h: Math.round(_H * 0.24),
+                y: Math.round(_H * 0.30),
+                w: Math.round(_W * 0.60),
+                h: Math.round(_H * 0.18),
             },
         },
 

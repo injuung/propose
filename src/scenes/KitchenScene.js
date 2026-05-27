@@ -12,6 +12,12 @@ class KitchenScene extends Phaser.Scene {
             this.load.image('char_male', 'assets/characters/char_male.png');
         if (!this.textures.exists('char_female'))
             this.load.image('char_female', 'assets/characters/char_female.png');
+
+        // 냉장고 클릭 시 표시할 사진 (config에 url 또는 driveId 설정 필요)
+        const memCfg = GAME_CONFIG.ASSETS.objects.fridge_memory;
+        if (memCfg && memCfg.url && !this.textures.exists(memCfg.key)) {
+            this.load.image(memCfg.key, memCfg.url);
+        }
     }
 
     create() {
@@ -147,30 +153,23 @@ class KitchenScene extends Phaser.Scene {
     // -------------------------------------------------------------------------
 
     _buildFridgePhotoEasterEgg() {
-        if (!this.textures.exists('fridge_photo')) return;
-
         const pos = GAME_CONFIG.POSITIONS.kitchen.fridge_photo;
-        const spr = this.add.image(pos.x, pos.y, 'fridge_photo')
-            .setDepth(8).setScale(0.28)
+
+        // 보이지 않는 클릭 영역만 생성 (라인·아이콘 없음)
+        const zone = this.add.zone(pos.x, pos.y, pos.w, pos.h)
+            .setDepth(8)
             .setInteractive({ useHandCursor: true });
 
-        this.tweens.add({
-            targets: spr, alpha: 0.65, duration: 2200,
-            yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
-        });
-
-        spr.on('pointerover', () => {
-            spr.setScale(0.32).setAlpha(1);
-            this.tweens.getTweensOf(spr).forEach(t => t.pause());
-        });
-        spr.on('pointerout', () => {
-            spr.setScale(0.28);
-            this.tweens.getTweensOf(spr).forEach(t => t.resume());
-        });
-        spr.on('pointerdown', (pointer, lx, ly, event) => {
+        zone.on('pointerdown', (pointer, lx, ly, event) => {
             event.stopPropagation();
             this._showPhotoModal();
         });
+
+        // DEBUG_MODE 에서만 영역 시각화
+        if (GAME_CONFIG.DEBUG_MODE) {
+            this.add.rectangle(pos.x, pos.y, pos.w, pos.h)
+                .setDepth(99).setStrokeStyle(2, 0x00ff00, 1).setFillStyle(0x00ff00, 0.15);
+        }
     }
 
     _goToLiving() {
@@ -184,23 +183,40 @@ class KitchenScene extends Phaser.Scene {
 
     _showPhotoModal() {
         const { WIDTH, HEIGHT } = GAME_CONFIG;
+        const memCfg = GAME_CONFIG.ASSETS.objects.fridge_memory;
+        const hasPhoto = memCfg && this.textures.exists(memCfg.key);
 
-        const overlay = this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 0x000000, 0.82)
+        // 어두운 배경
+        const overlay = this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 0x000000, 0.90)
             .setDepth(90).setInteractive();
 
-        const photo = this.add.image(WIDTH / 2, HEIGHT / 2, 'fridge_photo')
-            .setDepth(91).setScale(0);
+        let photo = null;
+        if (hasPhoto) {
+            // 사용자가 제공한 사진 — 화면에 꽉 차게 표시
+            photo = this.add.image(WIDTH / 2, HEIGHT / 2, memCfg.key).setDepth(91).setAlpha(0);
+            const src    = this.textures.get(memCfg.key).getSourceImage();
+            const scaleX = WIDTH  / src.width;
+            const scaleY = HEIGHT / src.height;
+            photo.setScale(Math.min(scaleX, scaleY));   // 비율 유지, 화면 안에 꽉 맞춤
+            this.tweens.add({ targets: photo, alpha: 1, duration: 400 });
+        } else {
+            // 사진이 아직 없을 때 안내 텍스트
+            this.add.text(WIDTH / 2, HEIGHT / 2 - 20,
+                '사진을 준비중이에요 ♡\n\nconfig.js > fridge_memory 에\n사진 경로를 입력하세요', {
+                fontFamily: 'sans-serif', fontSize: '18px',
+                fill: '#ffffff', align: 'center',
+            }).setOrigin(0.5).setDepth(91);
+        }
 
-        this.tweens.add({ targets: photo, scale: 1.1, duration: 320, ease: 'Back.easeOut' });
-
-        const hint = this.add.text(WIDTH / 2, HEIGHT - 60, '화면을 탭하면 닫힙니다', {
-            fontFamily: 'sans-serif', fontSize: '18px', fill: '#aaaaaa',
+        const hint = this.add.text(WIDTH / 2, HEIGHT - 50, '화면을 탭하면 닫힙니다', {
+            fontFamily: 'sans-serif', fontSize: '15px', fill: '#888888',
         }).setOrigin(0.5).setDepth(92);
 
+        const closeTargets = photo ? [overlay, photo, hint] : [overlay, hint];
         overlay.once('pointerdown', () => {
             this.tweens.add({
-                targets: [overlay, photo, hint], alpha: 0, duration: 200,
-                onComplete: () => { overlay.destroy(); photo.destroy(); hint.destroy(); },
+                targets: closeTargets, alpha: 0, duration: 200,
+                onComplete: () => closeTargets.forEach(o => o.destroy()),
             });
         });
     }
