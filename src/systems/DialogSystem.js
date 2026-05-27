@@ -53,9 +53,9 @@ class DialogSystem {
 
     _buildUI() {
         const { WIDTH, HEIGHT } = GAME_CONFIG;
-        const boxW = WIDTH - 20;
-        const boxH = 185;
-        const posY = HEIGHT * 0.79;
+        const boxW = WIDTH - 16;   // 좌우 여백 최소화
+        const boxH = 130;          // 높이 최소화 (잘림 없이)
+        const posY = HEIGHT * 0.83; // 화면 하단 가까이
 
         this.container = this.scene.add.container(WIDTH / 2, posY)
             .setDepth(50).setVisible(false);
@@ -66,9 +66,9 @@ class DialogSystem {
 
         // --- 발화자 이름 라벨 (평소엔 숨김) ---
         this._nameLabel = this.scene.add.text(
-            -boxW / 2 + 16, -boxH / 2 + 10, '', {
+            -boxW / 2 + 14, -boxH / 2 + 8, '', {
             fontFamily:      'sans-serif',
-            fontSize:        '14px',
+            fontSize:        '13px',
             fontStyle:       'bold',
             fill:            '#f1c40f',
             stroke:          '#000000',
@@ -80,18 +80,18 @@ class DialogSystem {
 
         // --- 대사 텍스트 ---
         this.textObj = this.scene.add.text(
-            -boxW / 2 + 16, -boxH / 2 + 16, '', {
+            -boxW / 2 + 14, -boxH / 2 + 14, '', {
             fontFamily:  'sans-serif',
-            fontSize:    '19px',
+            fontSize:    '18px',
             fill:        '#ffffff',
-            wordWrap:    { width: boxW - 36 },
-            lineSpacing: 5,
+            wordWrap:    { width: boxW - 30 },
+            lineSpacing: 4,
         });
 
         // --- ▼ 다음 아이콘 ---
         this.nextIcon = this.scene.add.text(
-            boxW / 2 - 22, boxH / 2 - 22, '▼', {
-            fontSize: '20px',
+            boxW / 2 - 18, boxH / 2 - 16, '▼', {
+            fontSize: '16px',
             fill:     '#f1c40f',
         }).setOrigin(0.5);
 
@@ -140,15 +140,14 @@ class DialogSystem {
 
     _updateSpeakerLabel(speaker) {
         const { WIDTH } = GAME_CONFIG;
-        const boxW  = WIDTH - 20;
-        const boxH  = 185;
+        const boxW  = WIDTH - 16;
+        const boxH  = 130;
 
         this._divider.clear();
 
         if (!speaker || !GAME_CONFIG.SPEAKERS || !GAME_CONFIG.SPEAKERS[speaker]) {
-            // 발화자 없음 — 텍스트를 위에서부터 표시
             this._nameLabel.setVisible(false);
-            this.textObj.setPosition(-boxW / 2 + 16, -boxH / 2 + 16);
+            this.textObj.setPosition(-boxW / 2 + 14, -boxH / 2 + 14);
             return;
         }
 
@@ -158,20 +157,20 @@ class DialogSystem {
 
         // 이름 라벨
         this._nameLabel
-            .setPosition(-boxW / 2 + 16, -boxH / 2 + 10)
+            .setPosition(-boxW / 2 + 14, -boxH / 2 + 8)
             .setText(cfg.name)
             .setStyle({ fill: nameColor })
             .setVisible(true);
 
         // 구분선
-        this._divider.lineStyle(1, lineColor, 0.5);
+        this._divider.lineStyle(1, lineColor, 0.4);
         this._divider.lineBetween(
-            -boxW / 2 + 12, -boxH / 2 + 38,
-             boxW / 2 - 12, -boxH / 2 + 38
+            -boxW / 2 + 10, -boxH / 2 + 30,
+             boxW / 2 - 10, -boxH / 2 + 30
         );
 
         // 텍스트를 이름 아래로 내림
-        this.textObj.setPosition(-boxW / 2 + 16, -boxH / 2 + 46);
+        this.textObj.setPosition(-boxW / 2 + 14, -boxH / 2 + 36);
     }
 
     _typewrite(text) {

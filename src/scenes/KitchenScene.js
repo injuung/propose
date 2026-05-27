@@ -84,17 +84,17 @@ class KitchenScene extends Phaser.Scene {
 
     _createPortraits() {
         const { WIDTH, HEIGHT } = GAME_CONFIG;
-        const portY = HEIGHT * 0.63;
+        const portY = HEIGHT * 0.60;
 
-        this._portFemale = this._buildPortrait(WIDTH * 0.18, portY, 'char_female', 'female');
-        this._portMale   = this._buildPortrait(WIDTH * 0.82, portY, 'char_male',   'male');
+        this._portFemale = this._buildPortrait(WIDTH * 0.20, portY, 'char_female', 'female');
+        this._portMale   = this._buildPortrait(WIDTH * 0.80, portY, 'char_male',   'male');
 
         this._portFemale.root.setAlpha(0);
         this._portMale.root.setAlpha(0);
     }
 
     _buildPortrait(x, y, textureKey, speakerKey) {
-        const portSize  = 54;
+        const portSize  = 80;
         const nameColor = speakerKey === 'male' ? 0x88ccff : 0xffaabb;
         const cfg       = GAME_CONFIG.SPEAKERS[speakerKey];
 
@@ -118,9 +118,9 @@ class KitchenScene extends Phaser.Scene {
         }
 
         const hex   = '#' + nameColor.toString(16).padStart(6, '0');
-        const label = this.add.text(0, portSize / 2 + 12, cfg ? cfg.name : speakerKey, {
+        const label = this.add.text(0, portSize / 2 + 13, cfg ? cfg.name : speakerKey, {
             fontFamily:      'sans-serif',
-            fontSize:        '13px',
+            fontSize:        '14px',
             fill:            hex,
             stroke:          '#000000',
             strokeThickness: 3,

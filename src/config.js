@@ -88,8 +88,8 @@ const GAME_CONFIG = {
     // key  : preload 에서 사용하는 텍스처 키 이름
     // =========================================================================
     SPEAKERS: {
-        male:   { name: '그',   key: 'char_male' },
-        female: { name: '그녀', key: 'char_female' },
+        male:   { name: '인중', key: 'char_male' },
+        female: { name: '정문', key: 'char_female' },
     },
 
     // =========================================================================
