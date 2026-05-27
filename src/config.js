@@ -73,10 +73,15 @@ const GAME_CONFIG = {
         },
 
         video: {
+            // ★ 동영상 설정 방법
+            //   1. Google Drive 파일 공유 링크 예시:
+            //      https://drive.google.com/file/d/[파일ID]/view
+            //   2. [파일ID] 부분을 아래 driveId 에 붙여넣기
+            //   예) driveId: '1A2B3C4D5E6F7G8H9I0J'
             propose: {
                 key:     'propose_video',
                 url:     '',
-                driveId: '',
+                driveId: '',   // ← 여기에 Google Drive 파일 ID 입력
             },
         },
 
@@ -177,13 +182,14 @@ const GAME_CONFIG = {
         },
 
         living: {
-            // TV 화면 클릭 영역 — 실제 이미지 내 TV 위치에 맞게 조정
-            // DEBUG_MODE: true 로 설정하면 좌표를 확인할 수 있습니다
+            // TV 화면 클릭 영역
+            // 대화 종료 후 이 영역을 탭하면 동영상 재생
+            // DEBUG_MODE: true 로 설정하면 영역이 빨간 선으로 표시됩니다
             tv_hotspot: {
                 x: Math.round(_W * 0.50),
-                y: Math.round(_H * 0.30),
-                w: Math.round(_W * 0.60),
-                h: Math.round(_H * 0.18),
+                y: Math.round(_H * 0.38),
+                w: Math.round(_W * 0.88),   // 좌우 여백 6% 씩만 남기고 넓게
+                h: Math.round(_H * 0.30),   // 높이도 충분히
             },
         },
 

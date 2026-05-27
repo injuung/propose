@@ -33,7 +33,10 @@ class LivingScene extends Phaser.Scene {
             );
         });
 
-        this.input.on('pointerdown', () => this.dialog.advance());
+        // 대화 진행 탭 — TV 영역 클릭은 stopPropagation 으로 분리됨
+        this.input.on('pointerdown', () => {
+            if (this.dialog.isActive) this.dialog.advance();
+        });
 
         if (GAME_CONFIG.DEBUG_MODE) this._buildDebugUI();
     }
@@ -125,9 +128,10 @@ class LivingScene extends Phaser.Scene {
     _buildTVHotspot() {
         const pos = GAME_CONFIG.POSITIONS.living.tv_hotspot;
 
-        // 보이지 않는 클릭 영역만 생성 (라인·라벨 없음)
+        // 보이지 않는 클릭 영역 (라인·라벨 없음)
+        // depth 를 높여서 다른 요소보다 우선 이벤트를 받도록 설정
         const tvZone = this.add.zone(pos.x, pos.y, pos.w, pos.h)
-            .setDepth(5).setInteractive({ useHandCursor: true });
+            .setDepth(20).setInteractive({ useHandCursor: true });
 
         tvZone.on('pointerdown', (pointer, lx, ly, event) => {
             event.stopPropagation();
@@ -137,9 +141,10 @@ class LivingScene extends Phaser.Scene {
         // DEBUG_MODE 에서만 영역 시각화
         if (GAME_CONFIG.DEBUG_MODE) {
             this.add.rectangle(pos.x, pos.y, pos.w, pos.h)
-                .setDepth(99).setStrokeStyle(2, 0xff0000, 1).setFillStyle(0xff0000, 0.1);
-            this.add.text(pos.x, pos.y - pos.h / 2 - 12, '▶ TV 영역', {
-                fontFamily: 'monospace', fontSize: '14px', fill: '#ff0000',
+                .setDepth(99).setStrokeStyle(2, 0xff0000, 1).setFillStyle(0xff0000, 0.15);
+            this.add.text(pos.x, pos.y, '▶ TV 클릭 영역', {
+                fontFamily: 'monospace', fontSize: '14px', fill: '#ff4444',
+                backgroundColor: '#000000aa', padding: { x: 6, y: 4 },
             }).setOrigin(0.5).setDepth(100);
         }
     }
