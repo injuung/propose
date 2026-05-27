@@ -116,7 +116,9 @@ class QuizScene extends Phaser.Scene {
         this.time.delayedCall(700, () => {
             this.cameras.main.fadeOut(500, 0, 0, 0);
             this.cameras.main.once('camerafadeoutcomplete', () => {
-                this.scene.start('PreloadScene');
+                // PreloadScene을 거치지 않고 RoomScene으로 직접 이동
+                // (모바일에서 PreloadScene 로딩이 멈추는 문제 방지)
+                this.scene.start('RoomScene');
             });
         });
     }

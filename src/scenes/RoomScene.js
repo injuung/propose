@@ -1,59 +1,47 @@
 // =============================================================================
 // RoomScene.js : Stage 1 - 침실
-// 흐름: 씬 입장 → 탭 힌트 표시 → 대사 시작 → "이제 밥먹으러 가자." 후 KitchenScene 이동
+// 흐름: 씬 입장 → 탭 힌트 → 대사 → "이제 밥먹으러 가자." → KitchenScene
 // 대사 수정: config.js > DIALOGUES.room_intro
 // =============================================================================
 class RoomScene extends Phaser.Scene {
     constructor() { super('RoomScene'); }
 
+    preload() {
+        // 캐시에 없을 때만 로드
+        if (!this.textures.exists('bg_room')) {
+            this.load.image('bg_room', 'assets/backgrounds/bg_room.png');
+        }
+    }
+
     create() {
         const { WIDTH, HEIGHT } = GAME_CONFIG;
 
-        // 배경 (어두운 이미지 위에 밝기 보정 오버레이 추가)
         this._buildBackground();
-
-        // 캐릭터 (스프라이트 있을 때만)
         this._buildCharacters();
         this._buildPerfumeEasterEgg();
 
         this.dialog = new DialogSystem(this);
         new NavigationUI(this);
 
-        // ── 탭 힌트 오버레이 ──────────────────────────────────────
+        // 탭 힌트 — 처음엔 투명
         this._tapHint = this.add.text(WIDTH / 2, HEIGHT * 0.44, '화면을 탭하여 시작하세요', {
-            fontFamily: 'sans-serif',
-            fontSize:   '32px',
-            fill:       '#ffffff',
-            stroke:     '#000000',
+            fontFamily:      'sans-serif',
+            fontSize:        '28px',
+            fill:            '#ffffff',
+            stroke:          '#000000',
             strokeThickness: 6,
-            backgroundColor: '#00000088',
-            padding:    { x: 24, y: 14 },
+            backgroundColor: '#00000099',
+            padding:         { x: 20, y: 12 },
         }).setOrigin(0.5).setDepth(55).setAlpha(0);
 
-        // 페이드인 후 힌트 표시
-        this.cameras.main.fadeIn(400, 0, 0, 0);
-        this.cameras.main.once('camerafadeincomplete', () => {
-            // 힌트 텍스트 페이드인
-            this.tweens.add({
-                targets:  this._tapHint,
-                alpha:    1,
-                duration: 400,
-            });
-            // 힌트 깜빡임
-            this.tweens.add({
-                targets:  this._tapHint,
-                alpha:    0.4,
-                duration: 800,
-                yoyo:     true,
-                repeat:   -1,
-                delay:    500,
-            });
-        });
+        // camerafadeincomplete 대신 delayedCall 사용 (모바일 호환성)
+        this.cameras.main.fadeIn(300, 0, 0, 0);
+        this.time.delayedCall(350, () => this._showTapHint());
 
-        // 화면 탭 시 → 힌트 제거 후 대사 시작
+        // 첫 탭 → 힌트 제거 후 대사 시작
         this.input.once('pointerdown', () => {
             this.tweens.killTweensOf(this._tapHint);
-            this._tapHint.destroy();
+            this._tapHint.setVisible(false);
             this.dialog.start(GAME_CONFIG.DIALOGUES.room_intro, () => {
                 this._goToKitchen();
             });
@@ -67,13 +55,25 @@ class RoomScene extends Phaser.Scene {
 
     // -------------------------------------------------------------------------
 
+    _showTapHint() {
+        this.tweens.add({ targets: this._tapHint, alpha: 1, duration: 350 });
+        this.time.delayedCall(400, () => {
+            this.tweens.add({
+                targets:  this._tapHint,
+                alpha:    0.4,
+                duration: 750,
+                yoyo:     true,
+                repeat:   -1,
+            });
+        });
+    }
+
     _buildBackground() {
         const { WIDTH, HEIGHT } = GAME_CONFIG;
         this.add.image(WIDTH / 2, HEIGHT / 2, 'bg_room')
             .setDepth(0)
             .setDisplaySize(WIDTH, HEIGHT);
-
-        // 어두운 배경 보정: 살짝 밝히는 흰 오버레이
+        // 밝기 보정
         this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 0xffffff, 0.08)
             .setDepth(1);
     }
@@ -139,7 +139,7 @@ class RoomScene extends Phaser.Scene {
 
     _buildDebugUI() {
         const dbg = this.add.text(10, 10, '', {
-            font: '18px monospace', fill: '#00ff00', backgroundColor: '#000000aa',
+            font: '16px monospace', fill: '#00ff00', backgroundColor: '#000000aa',
         }).setDepth(100);
         this.input.on('pointermove', ptr => {
             dbg.setText(`X:${Math.round(ptr.x)}  Y:${Math.round(ptr.y)}`);

@@ -1,10 +1,16 @@
 // =============================================================================
 // KitchenScene.js : Stage 2 - 부엌
-// 흐름: 씬 입장 → 탭 힌트 → 대사 → "야구볼래?" 후 LivingScene 이동
+// 흐름: 씬 입장 → 탭 힌트 → 대사 → "야구볼래?" → LivingScene
 // 대사 수정: config.js > DIALOGUES.kitchen_intro
 // =============================================================================
 class KitchenScene extends Phaser.Scene {
     constructor() { super('KitchenScene'); }
+
+    preload() {
+        if (!this.textures.exists('bg_kitchen')) {
+            this.load.image('bg_kitchen', 'assets/backgrounds/bg_kitchen.png');
+        }
+    }
 
     create() {
         const { WIDTH, HEIGHT } = GAME_CONFIG;
@@ -16,36 +22,27 @@ class KitchenScene extends Phaser.Scene {
         this.dialog = new DialogSystem(this);
         new NavigationUI(this);
 
-        // ── 탭 힌트 오버레이 ──────────────────────────────────────
         this._tapHint = this.add.text(WIDTH / 2, HEIGHT * 0.44, '화면을 탭하여 시작하세요', {
-            fontFamily: 'sans-serif',
-            fontSize:   '32px',
-            fill:       '#ffffff',
-            stroke:     '#000000',
+            fontFamily:      'sans-serif',
+            fontSize:        '28px',
+            fill:            '#ffffff',
+            stroke:          '#000000',
             strokeThickness: 6,
-            backgroundColor: '#00000088',
-            padding:    { x: 24, y: 14 },
+            backgroundColor: '#00000099',
+            padding:         { x: 20, y: 12 },
         }).setOrigin(0.5).setDepth(55).setAlpha(0);
 
-        this.cameras.main.fadeIn(400, 0, 0, 0);
-        this.cameras.main.once('camerafadeincomplete', () => {
-            this.tweens.add({ targets: this._tapHint, alpha: 1, duration: 400 });
-            this.tweens.add({
-                targets: this._tapHint, alpha: 0.4,
-                duration: 800, yoyo: true, repeat: -1, delay: 500,
-            });
-        });
+        this.cameras.main.fadeIn(300, 0, 0, 0);
+        this.time.delayedCall(350, () => this._showTapHint());
 
-        // 첫 탭 → 힌트 제거 후 대사 시작
         this.input.once('pointerdown', () => {
             this.tweens.killTweensOf(this._tapHint);
-            this._tapHint.destroy();
+            this._tapHint.setVisible(false);
             this.dialog.start(GAME_CONFIG.DIALOGUES.kitchen_intro, () => {
                 this._goToLiving();
             });
         });
 
-        // 이후 탭 → 대사 진행
         this.input.on('pointerdown', () => this.dialog.advance());
 
         if (GAME_CONFIG.DEBUG_MODE) this._buildDebugUI();
@@ -53,12 +50,24 @@ class KitchenScene extends Phaser.Scene {
 
     // -------------------------------------------------------------------------
 
+    _showTapHint() {
+        this.tweens.add({ targets: this._tapHint, alpha: 1, duration: 350 });
+        this.time.delayedCall(400, () => {
+            this.tweens.add({
+                targets:  this._tapHint,
+                alpha:    0.4,
+                duration: 750,
+                yoyo:     true,
+                repeat:   -1,
+            });
+        });
+    }
+
     _buildBackground() {
         const { WIDTH, HEIGHT } = GAME_CONFIG;
         this.add.image(WIDTH / 2, HEIGHT / 2, 'bg_kitchen')
             .setDepth(0)
             .setDisplaySize(WIDTH, HEIGHT);
-
         this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 0xffffff, 0.08)
             .setDepth(1);
     }
@@ -119,8 +128,8 @@ class KitchenScene extends Phaser.Scene {
 
         this.tweens.add({ targets: photo, scale: 1.1, duration: 320, ease: 'Back.easeOut' });
 
-        const hint = this.add.text(WIDTH / 2, HEIGHT - 55, '화면을 클릭하면 닫힙니다', {
-            fontFamily: 'sans-serif', fontSize: '20px', fill: '#aaaaaa',
+        const hint = this.add.text(WIDTH / 2, HEIGHT - 60, '화면을 탭하면 닫힙니다', {
+            fontFamily: 'sans-serif', fontSize: '18px', fill: '#aaaaaa',
         }).setOrigin(0.5).setDepth(92);
 
         overlay.once('pointerdown', () => {
@@ -133,7 +142,7 @@ class KitchenScene extends Phaser.Scene {
 
     _buildDebugUI() {
         const dbg = this.add.text(10, 10, '', {
-            font: '18px monospace', fill: '#00ff00', backgroundColor: '#000000aa',
+            font: '16px monospace', fill: '#00ff00', backgroundColor: '#000000aa',
         }).setDepth(100);
         this.input.on('pointermove', ptr => {
             dbg.setText(`X:${Math.round(ptr.x)}  Y:${Math.round(ptr.y)}`);
