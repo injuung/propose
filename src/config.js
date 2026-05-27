@@ -11,6 +11,10 @@ const GAME_CONFIG = {
 
     DEBUG_MODE: false,  // true: 클릭 좌표 및 핫스팟 시각화
 
+    // 캐릭터 배경 자동 제거 허용 오차 (0 ~ 255)
+    // 낮을수록 안전(잔상 가능), 높을수록 공격적(캐릭터 일부 소실 가능)
+    BG_REMOVE_TOLERANCE: 40,
+
     // 실제 기기 뷰포트 크기 (갤럭시 S24·아이폰 등 어떤 폰이든 자동 맞춤)
     WIDTH:  _W,
     HEIGHT: _H,

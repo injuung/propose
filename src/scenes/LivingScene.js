@@ -19,6 +19,9 @@ class LivingScene extends Phaser.Scene {
 
         this._buildBackground();
         this._buildTVHotspot();
+
+        removeBgFromTexture(this, 'char_male',   'char_male_nobg');
+        removeBgFromTexture(this, 'char_female', 'char_female_nobg');
         this._createCharacters();
 
         this.dialog = new DialogSystem(this);
@@ -72,12 +75,14 @@ class LivingScene extends Phaser.Scene {
 
         const root = this.add.container(x, y).setDepth(12);
 
+        const useKey = this.textures.exists(textureKey + '_nobg') ? textureKey + '_nobg' : textureKey;
+
         let img = null;
-        if (this.textures.exists(textureKey)) {
-            const src     = this.textures.get(textureKey).getSourceImage();
+        if (this.textures.exists(useKey)) {
+            const src     = this.textures.get(useKey).getSourceImage();
             const targetH = Math.round(HEIGHT * 0.46);
             const scale   = targetH / src.height;
-            img = this.add.image(0, 0, textureKey);
+            img = this.add.image(0, 0, useKey);
             img.setScale(scale);
             img.setOrigin(0.5, 1);
         }

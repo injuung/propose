@@ -19,7 +19,11 @@ class RoomScene extends Phaser.Scene {
 
         this._buildBackground();
         this._buildPerfumeEasterEgg();
-        this._createCharacters();   // 씬 안에 전신 캐릭터 배치
+
+        // 캐릭터 배경 자동 제거 (회색 → 투명)
+        removeBgFromTexture(this, 'char_male',   'char_male_nobg');
+        removeBgFromTexture(this, 'char_female', 'char_female_nobg');
+        this._createCharacters();
 
         this.dialog = new DialogSystem(this);
         new NavigationUI(this);
@@ -97,14 +101,17 @@ class RoomScene extends Phaser.Scene {
         // depth 12: 배경보다 위, 대화창(50)보다 아래
         const root = this.add.container(x, y).setDepth(12);
 
+        // 배경 제거된 텍스처가 있으면 우선 사용
+        const useKey = this.textures.exists(textureKey + '_nobg') ? textureKey + '_nobg' : textureKey;
+
         let img = null;
-        if (this.textures.exists(textureKey)) {
-            const src    = this.textures.get(textureKey).getSourceImage();
-            const targetH = Math.round(HEIGHT * 0.46); // 화면 높이의 46%
+        if (this.textures.exists(useKey)) {
+            const src     = this.textures.get(useKey).getSourceImage();
+            const targetH = Math.round(HEIGHT * 0.46);
             const scale   = targetH / src.height;
-            img = this.add.image(0, 0, textureKey);
+            img = this.add.image(0, 0, useKey);
             img.setScale(scale);
-            img.setOrigin(0.5, 1);  // 발 기준점
+            img.setOrigin(0.5, 1);
         }
 
         // 이름 라벨 — 머리 위에 작게
