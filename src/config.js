@@ -103,13 +103,15 @@ const GAME_CONFIG = {
 
     // =========================================================================
     // [퀴즈 설정]
+    // ★ choices 의 imageUrl : 각 항목 이미지 경로 (없으면 '' 로 비워두기)
+    //   예) imageUrl: 'assets/quiz/jazzbar.png'
     // =========================================================================
     QUIZ: {
-        question:  '우리의 시작',
+        question:  '우리의 사랑이 시작한 곳',
         choices: [
-            '재즈바',
-            '치킨집',
-            '와인샵',
+            { label: '재즈바',  imageKey: 'quiz_jazzbar',  imageUrl: 'assets/quiz/jazzbar.png'  },
+            { label: '치킨집',  imageKey: 'quiz_chicken',  imageUrl: 'assets/quiz/chicken.png'  },
+            { label: '와인샵',  imageKey: 'quiz_wineshop', imageUrl: 'assets/quiz/wineshop.png' },
         ],
         answer:    '재즈바',
         wrong_msg: '다시 생각해봐... 💭',
