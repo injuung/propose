@@ -1,6 +1,6 @@
 // =============================================================================
 // RoomScene.js : Stage 1 - 침실
-// 흐름: 씬 입장 → 탭 힌트 → 대사 (캐릭터 초상화 표시) → KitchenScene
+// 흐름: 씬 입장 → 탭 힌트 → 대사 (캐릭터 전신 표시) → 부엌 이동 버튼
 // =============================================================================
 class RoomScene extends Phaser.Scene {
     constructor() { super('RoomScene'); }
@@ -19,7 +19,7 @@ class RoomScene extends Phaser.Scene {
 
         this._buildBackground();
         this._buildPerfumeEasterEgg();
-        this._createPortraits();
+        this._createCharacters();   // 씬 안에 전신 캐릭터 배치
 
         this.dialog = new DialogSystem(this);
         new NavigationUI(this);
@@ -73,78 +73,78 @@ class RoomScene extends Phaser.Scene {
     }
 
     // -------------------------------------------------------------------------
-    // 캐릭터 초상화
+    // 캐릭터 전신 배치 (박스 없이 씬에 직접)
     // -------------------------------------------------------------------------
 
-    _createPortraits() {
+    _createCharacters() {
         const { WIDTH, HEIGHT } = GAME_CONFIG;
-        const portY = HEIGHT * 0.60;
+        // 발 위치: 대화창(depth 50) 아래에 살짝 걸쳐 상반신만 보이는 VN 스타일
+        const feetY = Math.round(HEIGHT * 0.87);
 
-        this._portFemale = this._buildPortrait(WIDTH * 0.20, portY, 'char_female', 'female');
-        this._portMale   = this._buildPortrait(WIDTH * 0.80, portY, 'char_male',   'male');
+        this._charFemale = this._buildCharSprite(WIDTH * 0.22, feetY, 'char_female', 'female');
+        this._charMale   = this._buildCharSprite(WIDTH * 0.78, feetY, 'char_male',   'male');
 
-        // 처음엔 모두 숨김
-        this._portFemale.root.setAlpha(0);
-        this._portMale.root.setAlpha(0);
+        // 처음엔 숨김
+        this._charFemale.root.setAlpha(0);
+        this._charMale.root.setAlpha(0);
     }
 
-    _buildPortrait(x, y, textureKey, speakerKey) {
-        const portSize  = 80;
-        const nameColor = speakerKey === 'male' ? 0x88ccff : 0xffaabb;
+    _buildCharSprite(x, y, textureKey, speakerKey) {
+        const { HEIGHT } = GAME_CONFIG;
         const cfg       = GAME_CONFIG.SPEAKERS[speakerKey];
+        const nameColor = speakerKey === 'male' ? 0x88ccff : 0xffaabb;
 
-        const root = this.add.container(x, y).setDepth(48);
+        // depth 12: 배경보다 위, 대화창(50)보다 아래
+        const root = this.add.container(x, y).setDepth(12);
 
-        // 배경 + 테두리
-        const bg = this.add.graphics();
-        bg.fillStyle(0x111111, 0.82);
-        bg.fillRoundedRect(-portSize / 2 - 3, -portSize / 2 - 3, portSize + 6, portSize + 6 + 22, 10);
-        bg.lineStyle(2, nameColor, 0.85);
-        bg.strokeRoundedRect(-portSize / 2 - 3, -portSize / 2 - 3, portSize + 6, portSize + 6 + 22, 10);
-
-        // 캐릭터 이미지 (얼굴 중심 크롭)
         let img = null;
         if (this.textures.exists(textureKey)) {
-            const src  = this.textures.get(textureKey).getSourceImage();
-            const fH   = Math.floor(src.height * 0.40);
-            const cSz  = Math.min(src.width, fH);
-            const cX   = Math.floor((src.width - cSz) / 2);
+            const src    = this.textures.get(textureKey).getSourceImage();
+            const targetH = Math.round(HEIGHT * 0.46); // 화면 높이의 46%
+            const scale   = targetH / src.height;
             img = this.add.image(0, 0, textureKey);
-            img.setCrop(cX, 0, cSz, cSz);
-            img.setDisplaySize(portSize, portSize);
+            img.setScale(scale);
+            img.setOrigin(0.5, 1);  // 발 기준점
         }
 
-        // 이름 라벨
-        const hex   = '#' + nameColor.toString(16).padStart(6, '0');
-        const label = this.add.text(0, portSize / 2 + 13, cfg ? cfg.name : speakerKey, {
+        // 이름 라벨 — 머리 위에 작게
+        const charH   = img ? img.displayHeight : 0;
+        const hex     = '#' + nameColor.toString(16).padStart(6, '0');
+        const label   = this.add.text(0, -(charH + 6), cfg ? cfg.name : speakerKey, {
             fontFamily:      'sans-serif',
-            fontSize:        '14px',
+            fontSize:        '13px',
             fill:            hex,
             stroke:          '#000000',
-            strokeThickness: 3,
-        }).setOrigin(0.5);
+            strokeThickness: 4,
+            backgroundColor: '#00000077',
+            padding:         { x: 7, y: 3 },
+        }).setOrigin(0.5, 1);
 
-        const items = [bg, label];
+        const items = [];
         if (img) items.push(img);
+        items.push(label);
         root.add(items);
 
         return { root };
     }
 
     _onSpeakerChange(speaker) {
-        if (!this._portFemale || !this._portMale) return;
+        if (!this._charFemale || !this._charMale) return;
         if (speaker === null) {
-            this.tweens.add({ targets: [this._portFemale.root, this._portMale.root], alpha: 0, duration: 300 });
+            this.tweens.add({
+                targets:  [this._charFemale.root, this._charMale.root],
+                alpha:    0, duration: 400,
+            });
             return;
         }
-        const activePct   = 1.0;
-        const inactivePct = 0.25;
+        const active   = 1.0;
+        const inactive = 0.28;
         if (speaker === 'female') {
-            this.tweens.add({ targets: this._portFemale.root, alpha: activePct,   duration: 180 });
-            this.tweens.add({ targets: this._portMale.root,   alpha: inactivePct, duration: 180 });
+            this.tweens.add({ targets: this._charFemale.root, alpha: active,   duration: 180 });
+            this.tweens.add({ targets: this._charMale.root,   alpha: inactive, duration: 180 });
         } else {
-            this.tweens.add({ targets: this._portFemale.root, alpha: inactivePct, duration: 180 });
-            this.tweens.add({ targets: this._portMale.root,   alpha: activePct,   duration: 180 });
+            this.tweens.add({ targets: this._charFemale.root, alpha: inactive, duration: 180 });
+            this.tweens.add({ targets: this._charMale.root,   alpha: active,   duration: 180 });
         }
     }
 

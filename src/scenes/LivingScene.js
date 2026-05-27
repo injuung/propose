@@ -1,6 +1,6 @@
 // =============================================================================
 // LivingScene.js : Stage 3 - 거실
-// 흐름: 입장 → 힌트 대사 (캐릭터 초상화) → TV 클릭 → EndingScene
+// 흐름: 입장 → 힌트 대사 (캐릭터 전신 표시) → TV 클릭 → EndingScene
 // =============================================================================
 class LivingScene extends Phaser.Scene {
     constructor() { super('LivingScene'); }
@@ -19,7 +19,7 @@ class LivingScene extends Phaser.Scene {
 
         this._buildBackground();
         this._buildTVHotspot();
-        this._createPortraits();
+        this._createCharacters();
 
         this.dialog = new DialogSystem(this);
         new NavigationUI(this);
@@ -33,7 +33,6 @@ class LivingScene extends Phaser.Scene {
             );
         });
 
-        // 대화 진행 탭 — TV 영역 클릭은 stopPropagation 으로 분리됨
         this.input.on('pointerdown', () => {
             if (this.dialog.isActive) this.dialog.advance();
         });
@@ -52,74 +51,74 @@ class LivingScene extends Phaser.Scene {
     }
 
     // -------------------------------------------------------------------------
-    // 캐릭터 초상화
+    // 캐릭터 전신 배치
     // -------------------------------------------------------------------------
 
-    _createPortraits() {
+    _createCharacters() {
         const { WIDTH, HEIGHT } = GAME_CONFIG;
-        const portY = HEIGHT * 0.60;
+        const feetY = Math.round(HEIGHT * 0.87);
 
-        this._portFemale = this._buildPortrait(WIDTH * 0.20, portY, 'char_female', 'female');
-        this._portMale   = this._buildPortrait(WIDTH * 0.80, portY, 'char_male',   'male');
+        this._charFemale = this._buildCharSprite(WIDTH * 0.22, feetY, 'char_female', 'female');
+        this._charMale   = this._buildCharSprite(WIDTH * 0.78, feetY, 'char_male',   'male');
 
-        this._portFemale.root.setAlpha(0);
-        this._portMale.root.setAlpha(0);
+        this._charFemale.root.setAlpha(0);
+        this._charMale.root.setAlpha(0);
     }
 
-    _buildPortrait(x, y, textureKey, speakerKey) {
-        const portSize  = 80;
-        const nameColor = speakerKey === 'male' ? 0x88ccff : 0xffaabb;
+    _buildCharSprite(x, y, textureKey, speakerKey) {
+        const { HEIGHT } = GAME_CONFIG;
         const cfg       = GAME_CONFIG.SPEAKERS[speakerKey];
+        const nameColor = speakerKey === 'male' ? 0x88ccff : 0xffaabb;
 
-        const root = this.add.container(x, y).setDepth(48);
-
-        const bg = this.add.graphics();
-        bg.fillStyle(0x111111, 0.82);
-        bg.fillRoundedRect(-portSize / 2 - 3, -portSize / 2 - 3, portSize + 6, portSize + 6 + 22, 10);
-        bg.lineStyle(2, nameColor, 0.85);
-        bg.strokeRoundedRect(-portSize / 2 - 3, -portSize / 2 - 3, portSize + 6, portSize + 6 + 22, 10);
+        const root = this.add.container(x, y).setDepth(12);
 
         let img = null;
         if (this.textures.exists(textureKey)) {
-            const src = this.textures.get(textureKey).getSourceImage();
-            const fH  = Math.floor(src.height * 0.40);
-            const cSz = Math.min(src.width, fH);
-            const cX  = Math.floor((src.width - cSz) / 2);
+            const src     = this.textures.get(textureKey).getSourceImage();
+            const targetH = Math.round(HEIGHT * 0.46);
+            const scale   = targetH / src.height;
             img = this.add.image(0, 0, textureKey);
-            img.setCrop(cX, 0, cSz, cSz);
-            img.setDisplaySize(portSize, portSize);
+            img.setScale(scale);
+            img.setOrigin(0.5, 1);
         }
 
-        const hex   = '#' + nameColor.toString(16).padStart(6, '0');
-        const label = this.add.text(0, portSize / 2 + 13, cfg ? cfg.name : speakerKey, {
+        const charH  = img ? img.displayHeight : 0;
+        const hex    = '#' + nameColor.toString(16).padStart(6, '0');
+        const label  = this.add.text(0, -(charH + 6), cfg ? cfg.name : speakerKey, {
             fontFamily:      'sans-serif',
-            fontSize:        '14px',
+            fontSize:        '13px',
             fill:            hex,
             stroke:          '#000000',
-            strokeThickness: 3,
-        }).setOrigin(0.5);
+            strokeThickness: 4,
+            backgroundColor: '#00000077',
+            padding:         { x: 7, y: 3 },
+        }).setOrigin(0.5, 1);
 
-        const items = [bg, label];
+        const items = [];
         if (img) items.push(img);
+        items.push(label);
         root.add(items);
 
         return { root };
     }
 
     _onSpeakerChange(speaker) {
-        if (!this._portFemale || !this._portMale) return;
+        if (!this._charFemale || !this._charMale) return;
         if (speaker === null) {
-            this.tweens.add({ targets: [this._portFemale.root, this._portMale.root], alpha: 0, duration: 300 });
+            this.tweens.add({
+                targets: [this._charFemale.root, this._charMale.root],
+                alpha: 0, duration: 400,
+            });
             return;
         }
-        const activePct   = 1.0;
-        const inactivePct = 0.25;
+        const active   = 1.0;
+        const inactive = 0.28;
         if (speaker === 'female') {
-            this.tweens.add({ targets: this._portFemale.root, alpha: activePct,   duration: 180 });
-            this.tweens.add({ targets: this._portMale.root,   alpha: inactivePct, duration: 180 });
+            this.tweens.add({ targets: this._charFemale.root, alpha: active,   duration: 180 });
+            this.tweens.add({ targets: this._charMale.root,   alpha: inactive, duration: 180 });
         } else {
-            this.tweens.add({ targets: this._portFemale.root, alpha: inactivePct, duration: 180 });
-            this.tweens.add({ targets: this._portMale.root,   alpha: activePct,   duration: 180 });
+            this.tweens.add({ targets: this._charFemale.root, alpha: inactive, duration: 180 });
+            this.tweens.add({ targets: this._charMale.root,   alpha: active,   duration: 180 });
         }
     }
 
@@ -128,8 +127,6 @@ class LivingScene extends Phaser.Scene {
     _buildTVHotspot() {
         const pos = GAME_CONFIG.POSITIONS.living.tv_hotspot;
 
-        // 보이지 않는 클릭 영역 (라인·라벨 없음)
-        // depth 를 높여서 다른 요소보다 우선 이벤트를 받도록 설정
         const tvZone = this.add.zone(pos.x, pos.y, pos.w, pos.h)
             .setDepth(20).setInteractive({ useHandCursor: true });
 
@@ -138,7 +135,6 @@ class LivingScene extends Phaser.Scene {
             if (!this.dialog.isActive) this._playVideo();
         });
 
-        // DEBUG_MODE 에서만 영역 시각화
         if (GAME_CONFIG.DEBUG_MODE) {
             this.add.rectangle(pos.x, pos.y, pos.w, pos.h)
                 .setDepth(99).setStrokeStyle(2, 0xff0000, 1).setFillStyle(0xff0000, 0.15);

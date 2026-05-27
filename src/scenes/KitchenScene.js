@@ -1,6 +1,6 @@
 // =============================================================================
 // KitchenScene.js : Stage 2 - 부엌
-// 흐름: 씬 입장 → 탭 힌트 → 대사 (캐릭터 초상화 표시) → LivingScene
+// 흐름: 씬 입장 → 탭 힌트 → 대사 (캐릭터 전신 표시) → 거실 이동 버튼
 // =============================================================================
 class KitchenScene extends Phaser.Scene {
     constructor() { super('KitchenScene'); }
@@ -13,7 +13,6 @@ class KitchenScene extends Phaser.Scene {
         if (!this.textures.exists('char_female'))
             this.load.image('char_female', 'assets/characters/char_female.png');
 
-        // 냉장고 클릭 시 표시할 사진 (config에 url 또는 driveId 설정 필요)
         const memCfg = GAME_CONFIG.ASSETS.objects.fridge_memory;
         if (memCfg && memCfg.url && !this.textures.exists(memCfg.key)) {
             this.load.image(memCfg.key, memCfg.url);
@@ -25,7 +24,7 @@ class KitchenScene extends Phaser.Scene {
 
         this._buildBackground();
         this._buildFridgePhotoEasterEgg();
-        this._createPortraits();
+        this._createCharacters();
 
         this.dialog = new DialogSystem(this);
         new NavigationUI(this);
@@ -79,74 +78,74 @@ class KitchenScene extends Phaser.Scene {
     }
 
     // -------------------------------------------------------------------------
-    // 캐릭터 초상화
+    // 캐릭터 전신 배치
     // -------------------------------------------------------------------------
 
-    _createPortraits() {
+    _createCharacters() {
         const { WIDTH, HEIGHT } = GAME_CONFIG;
-        const portY = HEIGHT * 0.60;
+        const feetY = Math.round(HEIGHT * 0.87);
 
-        this._portFemale = this._buildPortrait(WIDTH * 0.20, portY, 'char_female', 'female');
-        this._portMale   = this._buildPortrait(WIDTH * 0.80, portY, 'char_male',   'male');
+        this._charFemale = this._buildCharSprite(WIDTH * 0.22, feetY, 'char_female', 'female');
+        this._charMale   = this._buildCharSprite(WIDTH * 0.78, feetY, 'char_male',   'male');
 
-        this._portFemale.root.setAlpha(0);
-        this._portMale.root.setAlpha(0);
+        this._charFemale.root.setAlpha(0);
+        this._charMale.root.setAlpha(0);
     }
 
-    _buildPortrait(x, y, textureKey, speakerKey) {
-        const portSize  = 80;
-        const nameColor = speakerKey === 'male' ? 0x88ccff : 0xffaabb;
+    _buildCharSprite(x, y, textureKey, speakerKey) {
+        const { HEIGHT } = GAME_CONFIG;
         const cfg       = GAME_CONFIG.SPEAKERS[speakerKey];
+        const nameColor = speakerKey === 'male' ? 0x88ccff : 0xffaabb;
 
-        const root = this.add.container(x, y).setDepth(48);
-
-        const bg = this.add.graphics();
-        bg.fillStyle(0x111111, 0.82);
-        bg.fillRoundedRect(-portSize / 2 - 3, -portSize / 2 - 3, portSize + 6, portSize + 6 + 22, 10);
-        bg.lineStyle(2, nameColor, 0.85);
-        bg.strokeRoundedRect(-portSize / 2 - 3, -portSize / 2 - 3, portSize + 6, portSize + 6 + 22, 10);
+        const root = this.add.container(x, y).setDepth(12);
 
         let img = null;
         if (this.textures.exists(textureKey)) {
-            const src = this.textures.get(textureKey).getSourceImage();
-            const fH  = Math.floor(src.height * 0.40);
-            const cSz = Math.min(src.width, fH);
-            const cX  = Math.floor((src.width - cSz) / 2);
+            const src     = this.textures.get(textureKey).getSourceImage();
+            const targetH = Math.round(HEIGHT * 0.46);
+            const scale   = targetH / src.height;
             img = this.add.image(0, 0, textureKey);
-            img.setCrop(cX, 0, cSz, cSz);
-            img.setDisplaySize(portSize, portSize);
+            img.setScale(scale);
+            img.setOrigin(0.5, 1);
         }
 
-        const hex   = '#' + nameColor.toString(16).padStart(6, '0');
-        const label = this.add.text(0, portSize / 2 + 13, cfg ? cfg.name : speakerKey, {
+        const charH  = img ? img.displayHeight : 0;
+        const hex    = '#' + nameColor.toString(16).padStart(6, '0');
+        const label  = this.add.text(0, -(charH + 6), cfg ? cfg.name : speakerKey, {
             fontFamily:      'sans-serif',
-            fontSize:        '14px',
+            fontSize:        '13px',
             fill:            hex,
             stroke:          '#000000',
-            strokeThickness: 3,
-        }).setOrigin(0.5);
+            strokeThickness: 4,
+            backgroundColor: '#00000077',
+            padding:         { x: 7, y: 3 },
+        }).setOrigin(0.5, 1);
 
-        const items = [bg, label];
+        const items = [];
         if (img) items.push(img);
+        items.push(label);
         root.add(items);
 
         return { root };
     }
 
     _onSpeakerChange(speaker) {
-        if (!this._portFemale || !this._portMale) return;
+        if (!this._charFemale || !this._charMale) return;
         if (speaker === null) {
-            this.tweens.add({ targets: [this._portFemale.root, this._portMale.root], alpha: 0, duration: 300 });
+            this.tweens.add({
+                targets: [this._charFemale.root, this._charMale.root],
+                alpha: 0, duration: 400,
+            });
             return;
         }
-        const activePct   = 1.0;
-        const inactivePct = 0.25;
+        const active   = 1.0;
+        const inactive = 0.28;
         if (speaker === 'female') {
-            this.tweens.add({ targets: this._portFemale.root, alpha: activePct,   duration: 180 });
-            this.tweens.add({ targets: this._portMale.root,   alpha: inactivePct, duration: 180 });
+            this.tweens.add({ targets: this._charFemale.root, alpha: active,   duration: 180 });
+            this.tweens.add({ targets: this._charMale.root,   alpha: inactive, duration: 180 });
         } else {
-            this.tweens.add({ targets: this._portFemale.root, alpha: inactivePct, duration: 180 });
-            this.tweens.add({ targets: this._portMale.root,   alpha: activePct,   duration: 180 });
+            this.tweens.add({ targets: this._charFemale.root, alpha: inactive, duration: 180 });
+            this.tweens.add({ targets: this._charMale.root,   alpha: active,   duration: 180 });
         }
     }
 
@@ -155,17 +154,14 @@ class KitchenScene extends Phaser.Scene {
     _buildFridgePhotoEasterEgg() {
         const pos = GAME_CONFIG.POSITIONS.kitchen.fridge_photo;
 
-        // 보이지 않는 클릭 영역만 생성 (라인·아이콘 없음)
         const zone = this.add.zone(pos.x, pos.y, pos.w, pos.h)
-            .setDepth(8)
-            .setInteractive({ useHandCursor: true });
+            .setDepth(8).setInteractive({ useHandCursor: true });
 
         zone.on('pointerdown', (pointer, lx, ly, event) => {
             event.stopPropagation();
             this._showPhotoModal();
         });
 
-        // DEBUG_MODE 에서만 영역 시각화
         if (GAME_CONFIG.DEBUG_MODE) {
             this.add.rectangle(pos.x, pos.y, pos.w, pos.h)
                 .setDepth(99).setStrokeStyle(2, 0x00ff00, 1).setFillStyle(0x00ff00, 0.15);
@@ -221,24 +217,21 @@ class KitchenScene extends Phaser.Scene {
 
     _showPhotoModal() {
         const { WIDTH, HEIGHT } = GAME_CONFIG;
-        const memCfg = GAME_CONFIG.ASSETS.objects.fridge_memory;
+        const memCfg   = GAME_CONFIG.ASSETS.objects.fridge_memory;
         const hasPhoto = memCfg && this.textures.exists(memCfg.key);
 
-        // 어두운 배경
         const overlay = this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 0x000000, 0.90)
             .setDepth(90).setInteractive();
 
         let photo = null;
         if (hasPhoto) {
-            // 사용자가 제공한 사진 — 화면에 꽉 차게 표시
             photo = this.add.image(WIDTH / 2, HEIGHT / 2, memCfg.key).setDepth(91).setAlpha(0);
             const src    = this.textures.get(memCfg.key).getSourceImage();
             const scaleX = WIDTH  / src.width;
             const scaleY = HEIGHT / src.height;
-            photo.setScale(Math.min(scaleX, scaleY));   // 비율 유지, 화면 안에 꽉 맞춤
+            photo.setScale(Math.min(scaleX, scaleY));
             this.tweens.add({ targets: photo, alpha: 1, duration: 400 });
         } else {
-            // 사진이 아직 없을 때 안내 텍스트
             this.add.text(WIDTH / 2, HEIGHT / 2 - 20,
                 '사진을 준비중이에요 ♡\n\nconfig.js > fridge_memory 에\n사진 경로를 입력하세요', {
                 fontFamily: 'sans-serif', fontSize: '18px',
