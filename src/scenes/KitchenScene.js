@@ -1,14 +1,13 @@
 // =============================================================================
 // KitchenScene.js : Stage 2 - 부엌
-// 흐름: 씬 입장 → 대사 자동 시작 → 마지막 대사("야구볼래?") 후 LivingScene 이동
-// 대사 내용 수정: config.js > DIALOGUES.kitchen_intro
-// 이스터에그: 냉장고 사진 클릭 → 사진 확대 모달 (선택 사항)
+// 흐름: 씬 입장 → 탭 힌트 → 대사 → "야구볼래?" 후 LivingScene 이동
+// 대사 수정: config.js > DIALOGUES.kitchen_intro
 // =============================================================================
 class KitchenScene extends Phaser.Scene {
     constructor() { super('KitchenScene'); }
 
     create() {
-        this.cameras.main.fadeIn(600, 0, 0, 0);
+        const { WIDTH, HEIGHT } = GAME_CONFIG;
 
         this._buildBackground();
         this._buildCharacter();
@@ -17,14 +16,36 @@ class KitchenScene extends Phaser.Scene {
         this.dialog = new DialogSystem(this);
         new NavigationUI(this);
 
-        // 대사 자동 시작
-        this.time.delayedCall(800, () => {
+        // ── 탭 힌트 오버레이 ──────────────────────────────────────
+        this._tapHint = this.add.text(WIDTH / 2, HEIGHT * 0.50, '화면을 탭하여 시작하세요', {
+            fontFamily: 'sans-serif',
+            fontSize:   '32px',
+            fill:       '#ffffff',
+            stroke:     '#000000',
+            strokeThickness: 6,
+            backgroundColor: '#00000088',
+            padding:    { x: 24, y: 14 },
+        }).setOrigin(0.5).setDepth(55).setAlpha(0);
+
+        this.cameras.main.fadeIn(400, 0, 0, 0);
+        this.cameras.main.once('camerafadeincomplete', () => {
+            this.tweens.add({ targets: this._tapHint, alpha: 1, duration: 400 });
+            this.tweens.add({
+                targets: this._tapHint, alpha: 0.4,
+                duration: 800, yoyo: true, repeat: -1, delay: 500,
+            });
+        });
+
+        // 첫 탭 → 힌트 제거 후 대사 시작
+        this.input.once('pointerdown', () => {
+            this.tweens.killTweensOf(this._tapHint);
+            this._tapHint.destroy();
             this.dialog.start(GAME_CONFIG.DIALOGUES.kitchen_intro, () => {
                 this._goToLiving();
             });
         });
 
-        // 화면 클릭 시 대사 진행
+        // 이후 탭 → 대사 진행
         this.input.on('pointerdown', () => this.dialog.advance());
 
         if (GAME_CONFIG.DEBUG_MODE) this._buildDebugUI();
@@ -33,14 +54,17 @@ class KitchenScene extends Phaser.Scene {
     // -------------------------------------------------------------------------
 
     _buildBackground() {
-        this.add.image(GAME_CONFIG.WIDTH / 2, GAME_CONFIG.HEIGHT / 2, 'bg_kitchen')
+        const { WIDTH, HEIGHT } = GAME_CONFIG;
+        this.add.image(WIDTH / 2, HEIGHT / 2, 'bg_kitchen')
             .setDepth(0)
-            .setDisplaySize(GAME_CONFIG.WIDTH, GAME_CONFIG.HEIGHT);
+            .setDisplaySize(WIDTH, HEIGHT);
+
+        this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 0xffffff, 0.08)
+            .setDepth(1);
     }
 
     _buildCharacter() {
         if (!this.textures.exists('male_cook')) return;
-
         const pos = GAME_CONFIG.POSITIONS.kitchen.male_cook;
         this.add.image(pos.x, pos.y, 'male_cook')
             .setDepth(10).setOrigin(0.5, 1);
@@ -56,7 +80,7 @@ class KitchenScene extends Phaser.Scene {
 
         this.tweens.add({
             targets: spr, alpha: 0.65, duration: 2200,
-            yoyo: true, repeat: -1, ease: 'Sine.easeInOut'
+            yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
         });
 
         spr.on('pointerover', () => {
@@ -67,8 +91,8 @@ class KitchenScene extends Phaser.Scene {
             spr.setScale(0.28);
             this.tweens.getTweensOf(spr).forEach(t => t.resume());
         });
-        spr.on('pointerdown', (ptr) => {
-            ptr.event.stopPropagation();
+        spr.on('pointerdown', (pointer, lx, ly, event) => {
+            event.stopPropagation();
             this._showPhotoModal();
         });
     }
@@ -76,8 +100,8 @@ class KitchenScene extends Phaser.Scene {
     // -------------------------------------------------------------------------
 
     _goToLiving() {
-        this.time.delayedCall(400, () => {
-            this.cameras.main.fadeOut(600, 0, 0, 0);
+        this.time.delayedCall(300, () => {
+            this.cameras.main.fadeOut(500, 0, 0, 0);
             this.cameras.main.once('camerafadeoutcomplete', () => {
                 this.scene.start('LivingScene');
             });
@@ -96,22 +120,22 @@ class KitchenScene extends Phaser.Scene {
         this.tweens.add({ targets: photo, scale: 1.1, duration: 320, ease: 'Back.easeOut' });
 
         const hint = this.add.text(WIDTH / 2, HEIGHT - 55, '화면을 클릭하면 닫힙니다', {
-            fontFamily: 'sans-serif', fontSize: '20px', fill: '#aaaaaa'
+            fontFamily: 'sans-serif', fontSize: '20px', fill: '#aaaaaa',
         }).setOrigin(0.5).setDepth(92);
 
         overlay.once('pointerdown', () => {
             this.tweens.add({
                 targets: [overlay, photo, hint], alpha: 0, duration: 200,
-                onComplete: () => { overlay.destroy(); photo.destroy(); hint.destroy(); }
+                onComplete: () => { overlay.destroy(); photo.destroy(); hint.destroy(); },
             });
         });
     }
 
     _buildDebugUI() {
         const dbg = this.add.text(10, 10, '', {
-            font: '18px monospace', fill: '#00ff00', backgroundColor: '#000000aa'
+            font: '18px monospace', fill: '#00ff00', backgroundColor: '#000000aa',
         }).setDepth(100);
-        this.input.on('pointermove', (ptr) => {
+        this.input.on('pointermove', ptr => {
             dbg.setText(`X:${Math.round(ptr.x)}  Y:${Math.round(ptr.y)}`);
         });
     }
