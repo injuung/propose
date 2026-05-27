@@ -42,10 +42,10 @@ const GAME_CONFIG = {
         },
 
         characters: {
-            male_idle:   { key: 'male_idle',   url: '', driveId: '' },
-            male_cook:   { key: 'male_cook',   url: '', driveId: '' },
-            female_idle: { key: 'female_idle', url: '', driveId: '' },
-            couple_hug:  { key: 'couple_hug',  url: '', driveId: '' },
+            male_idle:   { key: 'char_male',   url: 'assets/characters/char_male.png',   driveId: '' },
+            male_cook:   { key: 'char_male',   url: 'assets/characters/char_male.png',   driveId: '' },
+            female_idle: { key: 'char_female', url: 'assets/characters/char_female.png', driveId: '' },
+            couple_hug:  { key: 'char_female', url: 'assets/characters/char_female.png', driveId: '' },
         },
 
         objects: {
@@ -75,6 +75,16 @@ const GAME_CONFIG = {
     },
 
     // =========================================================================
+    // [발화자 설정]
+    // name : 대화창 상단에 표시되는 이름 (자유롭게 변경 가능)
+    // key  : preload 에서 사용하는 텍스처 키 이름
+    // =========================================================================
+    SPEAKERS: {
+        male:   { name: '그',   key: 'char_male' },
+        female: { name: '그녀', key: 'char_female' },
+    },
+
+    // =========================================================================
     // [퀴즈 설정]
     // =========================================================================
     QUIZ: {
@@ -96,31 +106,31 @@ const GAME_CONFIG = {
 
         // Stage 1 (침실) — 마지막 줄 후 부엌 이동
         room_intro: [
-            "오늘 하루도 수고했어.",
-            "응... 네 옆에 누워있으니까 다 풀린다.",
-            "우리 이렇게 매일 같이 있을 수 있으면 좋겠다.",
-            "나도.",
-            "이제 밥먹으러 가자.",
+            { text: "오늘 하루도 수고했어.",                    speaker: 'male'   },
+            { text: "응... 네 옆에 누워있으니까 다 풀린다.",    speaker: 'female' },
+            { text: "우리 이렇게 매일 같이 있을 수 있으면 좋겠다.", speaker: 'male' },
+            { text: "나도.",                                    speaker: 'female' },
+            { text: "이제 밥먹으러 가자.",                     speaker: 'male'   },
         ],
 
         // Stage 2 (부엌) — 마지막 줄 후 거실 이동
         kitchen_intro: [
-            "오늘은 내가 해줄게.",
-            "진짜? 뭐 만들어줄 거야?",
-            "네가 좋아하는 거.",
-            "맛있겠다. 역시 네가 최고야.",
-            "다 됐어. 어때?",
-            "야구볼래?",
+            { text: "오늘은 내가 해줄게.",            speaker: 'male'   },
+            { text: "진짜? 뭐 만들어줄 거야?",       speaker: 'female' },
+            { text: "네가 좋아하는 거.",              speaker: 'male'   },
+            { text: "맛있겠다. 역시 네가 최고야.",    speaker: 'female' },
+            { text: "다 됐어. 어때?",                 speaker: 'male'   },
+            { text: "야구볼래?",                      speaker: 'female' },
         ],
 
         // Stage 3 (거실) — TV 힌트
         living_hint: [
-            "저기... TV 한번 켜볼래?",
+            { text: "저기... TV 한번 켜볼래?", speaker: 'female' },
         ],
 
         // 이스터에그: 향수
         room_perfume: [
-            "이 향수 냄새... 처음 만났을 때랑 똑같아.",
+            { text: "이 향수 냄새... 처음 만났을 때랑 똑같아.", speaker: 'female' },
         ],
 
     },

@@ -1,23 +1,25 @@
 // =============================================================================
 // KitchenScene.js : Stage 2 - 부엌
-// 흐름: 씬 입장 → 탭 힌트 → 대사 → "야구볼래?" → LivingScene
-// 대사 수정: config.js > DIALOGUES.kitchen_intro
+// 흐름: 씬 입장 → 탭 힌트 → 대사 (캐릭터 초상화 표시) → LivingScene
 // =============================================================================
 class KitchenScene extends Phaser.Scene {
     constructor() { super('KitchenScene'); }
 
     preload() {
-        if (!this.textures.exists('bg_kitchen')) {
+        if (!this.textures.exists('bg_kitchen'))
             this.load.image('bg_kitchen', 'assets/backgrounds/bg_kitchen.png');
-        }
+        if (!this.textures.exists('char_male'))
+            this.load.image('char_male', 'assets/characters/char_male.png');
+        if (!this.textures.exists('char_female'))
+            this.load.image('char_female', 'assets/characters/char_female.png');
     }
 
     create() {
         const { WIDTH, HEIGHT } = GAME_CONFIG;
 
         this._buildBackground();
-        this._buildCharacter();
         this._buildFridgePhotoEasterEgg();
+        this._createPortraits();
 
         this.dialog = new DialogSystem(this);
         new NavigationUI(this);
@@ -38,9 +40,11 @@ class KitchenScene extends Phaser.Scene {
         this.input.once('pointerdown', () => {
             this.tweens.killTweensOf(this._tapHint);
             this._tapHint.setVisible(false);
-            this.dialog.start(GAME_CONFIG.DIALOGUES.kitchen_intro, () => {
-                this._goToLiving();
-            });
+            this.dialog.start(
+                GAME_CONFIG.DIALOGUES.kitchen_intro,
+                () => this._goToLiving(),
+                (s) => this._onSpeakerChange(s)
+            );
         });
 
         this.input.on('pointerdown', () => this.dialog.advance());
@@ -54,11 +58,8 @@ class KitchenScene extends Phaser.Scene {
         this.tweens.add({ targets: this._tapHint, alpha: 1, duration: 350 });
         this.time.delayedCall(400, () => {
             this.tweens.add({
-                targets:  this._tapHint,
-                alpha:    0.4,
-                duration: 750,
-                yoyo:     true,
-                repeat:   -1,
+                targets: this._tapHint, alpha: 0.4,
+                duration: 750, yoyo: true, repeat: -1,
             });
         });
     }
@@ -66,18 +67,84 @@ class KitchenScene extends Phaser.Scene {
     _buildBackground() {
         const { WIDTH, HEIGHT } = GAME_CONFIG;
         this.add.image(WIDTH / 2, HEIGHT / 2, 'bg_kitchen')
-            .setDepth(0)
-            .setDisplaySize(WIDTH, HEIGHT);
+            .setDepth(0).setDisplaySize(WIDTH, HEIGHT);
         this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 0xffffff, 0.08)
             .setDepth(1);
     }
 
-    _buildCharacter() {
-        if (!this.textures.exists('male_cook')) return;
-        const pos = GAME_CONFIG.POSITIONS.kitchen.male_cook;
-        this.add.image(pos.x, pos.y, 'male_cook')
-            .setDepth(10).setOrigin(0.5, 1);
+    // -------------------------------------------------------------------------
+    // 캐릭터 초상화
+    // -------------------------------------------------------------------------
+
+    _createPortraits() {
+        const { WIDTH, HEIGHT } = GAME_CONFIG;
+        const portY = HEIGHT * 0.68;
+
+        this._portFemale = this._buildPortrait(WIDTH * 0.18, portY, 'char_female', 'female');
+        this._portMale   = this._buildPortrait(WIDTH * 0.82, portY, 'char_male',   'male');
+
+        this._portFemale.root.setAlpha(0);
+        this._portMale.root.setAlpha(0);
     }
+
+    _buildPortrait(x, y, textureKey, speakerKey) {
+        const portSize  = 68;
+        const nameColor = speakerKey === 'male' ? 0x88ccff : 0xffaabb;
+        const cfg       = GAME_CONFIG.SPEAKERS[speakerKey];
+
+        const root = this.add.container(x, y).setDepth(48);
+
+        const bg = this.add.graphics();
+        bg.fillStyle(0x111111, 0.82);
+        bg.fillRoundedRect(-portSize / 2 - 4, -portSize / 2 - 4, portSize + 8, portSize + 8 + 26, 12);
+        bg.lineStyle(2, nameColor, 0.85);
+        bg.strokeRoundedRect(-portSize / 2 - 4, -portSize / 2 - 4, portSize + 8, portSize + 8 + 26, 12);
+
+        let img = null;
+        if (this.textures.exists(textureKey)) {
+            const src = this.textures.get(textureKey).getSourceImage();
+            const fH  = Math.floor(src.height * 0.40);
+            const cSz = Math.min(src.width, fH);
+            const cX  = Math.floor((src.width - cSz) / 2);
+            img = this.add.image(0, 0, textureKey);
+            img.setCrop(cX, 0, cSz, cSz);
+            img.setDisplaySize(portSize, portSize);
+        }
+
+        const hex   = '#' + nameColor.toString(16).padStart(6, '0');
+        const label = this.add.text(0, portSize / 2 + 14, cfg ? cfg.name : speakerKey, {
+            fontFamily:      'sans-serif',
+            fontSize:        '16px',
+            fill:            hex,
+            stroke:          '#000000',
+            strokeThickness: 3,
+        }).setOrigin(0.5);
+
+        const items = [bg, label];
+        if (img) items.push(img);
+        root.add(items);
+
+        return { root };
+    }
+
+    _onSpeakerChange(speaker) {
+        if (!this._portFemale || !this._portMale) return;
+        if (speaker === null) {
+            this.tweens.add({ targets: [this._portFemale.root, this._portMale.root], alpha: 0, duration: 300 });
+            return;
+        }
+        const activePct   = 1.0;
+        const inactivePct = 0.25;
+        if (speaker === 'female') {
+            this.tweens.add({ targets: this._portFemale.root, alpha: activePct,   duration: 180 });
+            this.tweens.add({ targets: this._portMale.root,   alpha: inactivePct, duration: 180 });
+        } else {
+            this.tweens.add({ targets: this._portFemale.root, alpha: inactivePct, duration: 180 });
+            this.tweens.add({ targets: this._portMale.root,   alpha: activePct,   duration: 180 });
+        }
+    }
+
+    // -------------------------------------------------------------------------
 
     _buildFridgePhotoEasterEgg() {
         if (!this.textures.exists('fridge_photo')) return;
@@ -105,8 +172,6 @@ class KitchenScene extends Phaser.Scene {
             this._showPhotoModal();
         });
     }
-
-    // -------------------------------------------------------------------------
 
     _goToLiving() {
         this.time.delayedCall(300, () => {

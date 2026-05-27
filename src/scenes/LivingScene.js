@@ -1,14 +1,17 @@
 // =============================================================================
 // LivingScene.js : Stage 3 - 거실
-// 흐름: 입장 → 힌트 대사 → TV 클릭 → EndingScene(영상)
+// 흐름: 입장 → 힌트 대사 (캐릭터 초상화) → TV 클릭 → EndingScene
 // =============================================================================
 class LivingScene extends Phaser.Scene {
     constructor() { super('LivingScene'); }
 
     preload() {
-        if (!this.textures.exists('bg_living')) {
+        if (!this.textures.exists('bg_living'))
             this.load.image('bg_living', 'assets/backgrounds/bg_living.png');
-        }
+        if (!this.textures.exists('char_male'))
+            this.load.image('char_male', 'assets/characters/char_male.png');
+        if (!this.textures.exists('char_female'))
+            this.load.image('char_female', 'assets/characters/char_female.png');
     }
 
     create() {
@@ -16,14 +19,18 @@ class LivingScene extends Phaser.Scene {
 
         this._buildBackground();
         this._buildTVHotspot();
+        this._createPortraits();
 
         this.dialog = new DialogSystem(this);
         new NavigationUI(this);
 
-        // 입장 후 힌트 대사 자동 시작
         this.cameras.main.fadeIn(300, 0, 0, 0);
         this.time.delayedCall(400, () => {
-            this.dialog.start(GAME_CONFIG.DIALOGUES.living_hint, () => {});
+            this.dialog.start(
+                GAME_CONFIG.DIALOGUES.living_hint,
+                () => {},
+                (s) => this._onSpeakerChange(s)
+            );
         });
 
         this.input.on('pointerdown', () => this.dialog.advance());
@@ -36,11 +43,84 @@ class LivingScene extends Phaser.Scene {
     _buildBackground() {
         const { WIDTH, HEIGHT } = GAME_CONFIG;
         this.add.image(WIDTH / 2, HEIGHT / 2, 'bg_living')
-            .setDepth(0)
-            .setDisplaySize(WIDTH, HEIGHT);
+            .setDepth(0).setDisplaySize(WIDTH, HEIGHT);
         this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 0xffffff, 0.08)
             .setDepth(1);
     }
+
+    // -------------------------------------------------------------------------
+    // 캐릭터 초상화
+    // -------------------------------------------------------------------------
+
+    _createPortraits() {
+        const { WIDTH, HEIGHT } = GAME_CONFIG;
+        const portY = HEIGHT * 0.68;
+
+        this._portFemale = this._buildPortrait(WIDTH * 0.18, portY, 'char_female', 'female');
+        this._portMale   = this._buildPortrait(WIDTH * 0.82, portY, 'char_male',   'male');
+
+        this._portFemale.root.setAlpha(0);
+        this._portMale.root.setAlpha(0);
+    }
+
+    _buildPortrait(x, y, textureKey, speakerKey) {
+        const portSize  = 68;
+        const nameColor = speakerKey === 'male' ? 0x88ccff : 0xffaabb;
+        const cfg       = GAME_CONFIG.SPEAKERS[speakerKey];
+
+        const root = this.add.container(x, y).setDepth(48);
+
+        const bg = this.add.graphics();
+        bg.fillStyle(0x111111, 0.82);
+        bg.fillRoundedRect(-portSize / 2 - 4, -portSize / 2 - 4, portSize + 8, portSize + 8 + 26, 12);
+        bg.lineStyle(2, nameColor, 0.85);
+        bg.strokeRoundedRect(-portSize / 2 - 4, -portSize / 2 - 4, portSize + 8, portSize + 8 + 26, 12);
+
+        let img = null;
+        if (this.textures.exists(textureKey)) {
+            const src = this.textures.get(textureKey).getSourceImage();
+            const fH  = Math.floor(src.height * 0.40);
+            const cSz = Math.min(src.width, fH);
+            const cX  = Math.floor((src.width - cSz) / 2);
+            img = this.add.image(0, 0, textureKey);
+            img.setCrop(cX, 0, cSz, cSz);
+            img.setDisplaySize(portSize, portSize);
+        }
+
+        const hex   = '#' + nameColor.toString(16).padStart(6, '0');
+        const label = this.add.text(0, portSize / 2 + 14, cfg ? cfg.name : speakerKey, {
+            fontFamily:      'sans-serif',
+            fontSize:        '16px',
+            fill:            hex,
+            stroke:          '#000000',
+            strokeThickness: 3,
+        }).setOrigin(0.5);
+
+        const items = [bg, label];
+        if (img) items.push(img);
+        root.add(items);
+
+        return { root };
+    }
+
+    _onSpeakerChange(speaker) {
+        if (!this._portFemale || !this._portMale) return;
+        if (speaker === null) {
+            this.tweens.add({ targets: [this._portFemale.root, this._portMale.root], alpha: 0, duration: 300 });
+            return;
+        }
+        const activePct   = 1.0;
+        const inactivePct = 0.25;
+        if (speaker === 'female') {
+            this.tweens.add({ targets: this._portFemale.root, alpha: activePct,   duration: 180 });
+            this.tweens.add({ targets: this._portMale.root,   alpha: inactivePct, duration: 180 });
+        } else {
+            this.tweens.add({ targets: this._portFemale.root, alpha: inactivePct, duration: 180 });
+            this.tweens.add({ targets: this._portMale.root,   alpha: activePct,   duration: 180 });
+        }
+    }
+
+    // -------------------------------------------------------------------------
 
     _buildTVHotspot() {
         const pos = GAME_CONFIG.POSITIONS.living.tv_hotspot;
@@ -79,8 +159,6 @@ class LivingScene extends Phaser.Scene {
             this.tvLabel.setStyle({ fill: '#f1c40f' });
         });
     }
-
-    // -------------------------------------------------------------------------
 
     _playVideo() {
         this.tvHint.destroy();
