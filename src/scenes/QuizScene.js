@@ -18,15 +18,15 @@ class QuizScene extends Phaser.Scene {
         // 소제목
         this.add.text(WIDTH / 2, HEIGHT * 0.14, '우리를 알고 있나요?', {
             fontFamily: 'serif',
-            fontSize:   '22px',
+            fontSize:   '17px',
             fill:       '#aaaacc',
             fontStyle:  'italic',
         }).setOrigin(0.5);
 
         // 메인 질문
-        this.add.text(WIDTH / 2, HEIGHT * 0.26, question, {
+        this.add.text(WIDTH / 2, HEIGHT * 0.25, question, {
             fontFamily: 'serif',
-            fontSize:   '48px',
+            fontSize:   '38px',
             fill:       '#ffffff',
             fontStyle:  'bold',
         }).setOrigin(0.5);
@@ -34,13 +34,13 @@ class QuizScene extends Phaser.Scene {
         // 구분선
         const line = this.add.graphics();
         line.lineStyle(1, 0x5555aa, 0.6);
-        line.strokeRect(WIDTH / 2 - 140, HEIGHT * 0.35, 280, 0);
+        line.strokeRect(WIDTH / 2 - 120, HEIGHT * 0.33, 240, 0);
 
-        // 보기 버튼 (세로로 여유있게 배치)
-        const btnW  = WIDTH - 60;   // 390px
-        const btnH  = 74;
-        const startY = HEIGHT * 0.44;
-        const gapY   = 110;
+        // 보기 버튼 (세로 배치)
+        const btnW   = WIDTH - 60;
+        const btnH   = 60;
+        const startY = HEIGHT * 0.42;
+        const gapY   = 88;
 
         choices.forEach((text, i) => {
             this._createChoice(
@@ -74,7 +74,7 @@ class QuizScene extends Phaser.Scene {
 
         const txt = this.add.text(cx, cy, label, {
             fontFamily: 'sans-serif',
-            fontSize:   '26px',
+            fontSize:   '21px',
             fill:       '#ddddff',
         }).setOrigin(0.5);
 

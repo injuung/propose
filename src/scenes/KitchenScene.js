@@ -26,12 +26,12 @@ class KitchenScene extends Phaser.Scene {
 
         this._tapHint = this.add.text(WIDTH / 2, HEIGHT * 0.44, '화면을 탭하여 시작하세요', {
             fontFamily:      'sans-serif',
-            fontSize:        '28px',
+            fontSize:        '21px',
             fill:            '#ffffff',
             stroke:          '#000000',
-            strokeThickness: 6,
+            strokeThickness: 5,
             backgroundColor: '#00000099',
-            padding:         { x: 20, y: 12 },
+            padding:         { x: 16, y: 10 },
         }).setOrigin(0.5).setDepth(55).setAlpha(0);
 
         this.cameras.main.fadeIn(300, 0, 0, 0);
@@ -78,7 +78,7 @@ class KitchenScene extends Phaser.Scene {
 
     _createPortraits() {
         const { WIDTH, HEIGHT } = GAME_CONFIG;
-        const portY = HEIGHT * 0.68;
+        const portY = HEIGHT * 0.63;
 
         this._portFemale = this._buildPortrait(WIDTH * 0.18, portY, 'char_female', 'female');
         this._portMale   = this._buildPortrait(WIDTH * 0.82, portY, 'char_male',   'male');
@@ -88,7 +88,7 @@ class KitchenScene extends Phaser.Scene {
     }
 
     _buildPortrait(x, y, textureKey, speakerKey) {
-        const portSize  = 68;
+        const portSize  = 54;
         const nameColor = speakerKey === 'male' ? 0x88ccff : 0xffaabb;
         const cfg       = GAME_CONFIG.SPEAKERS[speakerKey];
 
@@ -96,9 +96,9 @@ class KitchenScene extends Phaser.Scene {
 
         const bg = this.add.graphics();
         bg.fillStyle(0x111111, 0.82);
-        bg.fillRoundedRect(-portSize / 2 - 4, -portSize / 2 - 4, portSize + 8, portSize + 8 + 26, 12);
+        bg.fillRoundedRect(-portSize / 2 - 3, -portSize / 2 - 3, portSize + 6, portSize + 6 + 22, 10);
         bg.lineStyle(2, nameColor, 0.85);
-        bg.strokeRoundedRect(-portSize / 2 - 4, -portSize / 2 - 4, portSize + 8, portSize + 8 + 26, 12);
+        bg.strokeRoundedRect(-portSize / 2 - 3, -portSize / 2 - 3, portSize + 6, portSize + 6 + 22, 10);
 
         let img = null;
         if (this.textures.exists(textureKey)) {
@@ -112,9 +112,9 @@ class KitchenScene extends Phaser.Scene {
         }
 
         const hex   = '#' + nameColor.toString(16).padStart(6, '0');
-        const label = this.add.text(0, portSize / 2 + 14, cfg ? cfg.name : speakerKey, {
+        const label = this.add.text(0, portSize / 2 + 12, cfg ? cfg.name : speakerKey, {
             fontFamily:      'sans-serif',
-            fontSize:        '16px',
+            fontSize:        '13px',
             fill:            hex,
             stroke:          '#000000',
             strokeThickness: 3,

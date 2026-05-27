@@ -23,19 +23,19 @@ class BootScene extends Phaser.Scene {
         // 타이틀 (2줄)
         this.add.text(WIDTH / 2, HEIGHT * 0.32, '우리가 함께하는\n새로운 시작', {
             fontFamily:      'serif',
-            fontSize:        '40px',
+            fontSize:        '32px',
             fill:            '#ffffff',
             fontStyle:       'italic',
             align:           'center',
             stroke:          '#000000',
-            strokeThickness: 5,
-            lineSpacing:     14,
+            strokeThickness: 4,
+            lineSpacing:     12,
         }).setOrigin(0.5);
 
-        // 날짜 또는 서브 문구
+        // 서브 문구
         this.add.text(WIDTH / 2, HEIGHT * 0.50, '♡', {
             fontFamily: 'serif',
-            fontSize:   '40px',
+            fontSize:   '32px',
             fill:       '#ffcccc',
         }).setOrigin(0.5);
 
@@ -47,10 +47,10 @@ class BootScene extends Phaser.Scene {
     _createStartButton(x, y) {
         const btn = this.add.text(x, y, '[ 시작하기 ]', {
             fontFamily:      'sans-serif',
-            fontSize:        '30px',
+            fontSize:        '24px',
             fill:            '#f1c40f',
             backgroundColor: '#00000077',
-            padding:         { x: 30, y: 14 },
+            padding:         { x: 24, y: 12 },
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
 
         // 깜빡임

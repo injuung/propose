@@ -68,7 +68,7 @@ class DialogSystem {
         this._nameLabel = this.scene.add.text(
             -boxW / 2 + 16, -boxH / 2 + 10, '', {
             fontFamily:      'sans-serif',
-            fontSize:        '17px',
+            fontSize:        '14px',
             fontStyle:       'bold',
             fill:            '#f1c40f',
             stroke:          '#000000',
@@ -82,10 +82,10 @@ class DialogSystem {
         this.textObj = this.scene.add.text(
             -boxW / 2 + 16, -boxH / 2 + 16, '', {
             fontFamily:  'sans-serif',
-            fontSize:    '24px',
+            fontSize:    '19px',
             fill:        '#ffffff',
             wordWrap:    { width: boxW - 36 },
-            lineSpacing: 6,
+            lineSpacing: 5,
         });
 
         // --- ▼ 다음 아이콘 ---

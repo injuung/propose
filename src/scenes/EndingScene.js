@@ -115,11 +115,14 @@ class EndingScene extends Phaser.Scene {
     _showEnding() {
         const { WIDTH, HEIGHT } = GAME_CONFIG;
 
-        const text = this.add.text(WIDTH / 2, HEIGHT / 2, 'Will you marry me?', {
-            fontFamily: 'serif',
-            fontSize:   '80px',
-            fill:       '#ffffff',
-            fontStyle:  'italic',
+        const text = this.add.text(WIDTH / 2, HEIGHT / 2, 'Will you\nmarry me?', {
+            fontFamily:  'serif',
+            fontSize:    '42px',
+            fill:        '#ffffff',
+            fontStyle:   'italic',
+            align:       'center',
+            lineSpacing: 10,
+            wordWrap:    { width: WIDTH - 60 },
         }).setOrigin(0.5).setAlpha(0).setDepth(20);
 
         this.tweens.add({
