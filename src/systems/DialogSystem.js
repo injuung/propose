@@ -1,6 +1,6 @@
 // =============================================================================
-// DialogSystem.js : 타이핑 효과와 대화창 UI
-// 대화창을 화면 중앙-하단(HEIGHT * 0.72)에 크고 명확하게 표시합니다
+// DialogSystem.js : 타이핑 대화창 — 갤럭시 S24 세로(450×940) 기준
+// 대화창은 화면 하단 79% 지점에 전체 너비로 표시됩니다
 // =============================================================================
 class DialogSystem {
     constructor(scene) {
@@ -30,7 +30,6 @@ class DialogSystem {
     advance() {
         if (!this.isActive) return;
         if (this.isTyping) {
-            // 타이핑 중이면 즉시 전체 텍스트 표시
             this.typeTimer.remove();
             this.textObj.setText(this.fullText);
             this.isTyping = false;
@@ -44,38 +43,40 @@ class DialogSystem {
 
     _buildUI() {
         const { WIDTH, HEIGHT } = GAME_CONFIG;
-        // 화면 높이의 72% 지점 (중앙-하단, 더 잘 보이는 위치)
-        const posY = HEIGHT * 0.72;
+        const boxW  = WIDTH - 20;   // 430px  (좌우 10px 여백)
+        const boxH  = 160;
+        const posY  = HEIGHT * 0.79; // 743px
 
         this.container = this.scene.add.container(WIDTH / 2, posY)
             .setDepth(50).setVisible(false);
 
-        // 대화창 배경 (더 크고 밝은 테두리)
+        // 배경 박스
         const bg = this.scene.add.graphics();
-        bg.fillStyle(0x000000, 0.85);
-        bg.fillRoundedRect(-560, -70, 1120, 140, 20);
-        bg.lineStyle(3, 0xf1c40f, 0.9);
-        bg.strokeRoundedRect(-560, -70, 1120, 140, 20);
+        bg.fillStyle(0x000000, 0.88);
+        bg.fillRoundedRect(-boxW / 2, -boxH / 2, boxW, boxH, 16);
+        bg.lineStyle(2.5, 0xf1c40f, 0.95);
+        bg.strokeRoundedRect(-boxW / 2, -boxH / 2, boxW, boxH, 16);
 
-        // 대사 텍스트 (폰트 크기 업)
-        this.textObj = this.scene.add.text(-520, -38, '', {
+        // 대사 텍스트
+        this.textObj = this.scene.add.text(
+            -boxW / 2 + 18, -boxH / 2 + 16, '', {
             fontFamily: 'sans-serif',
-            fontSize:   '34px',
+            fontSize:   '26px',
             fill:       '#ffffff',
-            wordWrap:   { width: 1040 },
+            wordWrap:   { width: boxW - 40 },
+            lineSpacing: 6,
         });
 
-        // "계속하려면 탭하세요" 아이콘 (▼ 깜빡임)
-        this.nextIcon = this.scene.add.text(510, 40, '▼', {
-            fontSize:   '26px',
-            fill:       '#f1c40f',
+        // ▼ 다음 아이콘
+        this.nextIcon = this.scene.add.text(
+            boxW / 2 - 22, boxH / 2 - 22, '▼', {
+            fontSize: '20px',
+            fill:     '#f1c40f',
         }).setOrigin(0.5);
+
         this.scene.tweens.add({
-            targets:  this.nextIcon,
-            alpha:    0,
-            duration: 500,
-            yoyo:     true,
-            repeat:   -1,
+            targets: this.nextIcon, alpha: 0,
+            duration: 500, yoyo: true, repeat: -1,
         });
         this.nextIcon.setVisible(false);
 

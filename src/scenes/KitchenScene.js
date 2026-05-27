@@ -17,7 +17,7 @@ class KitchenScene extends Phaser.Scene {
         new NavigationUI(this);
 
         // ── 탭 힌트 오버레이 ──────────────────────────────────────
-        this._tapHint = this.add.text(WIDTH / 2, HEIGHT * 0.50, '화면을 탭하여 시작하세요', {
+        this._tapHint = this.add.text(WIDTH / 2, HEIGHT * 0.44, '화면을 탭하여 시작하세요', {
             fontFamily: 'sans-serif',
             fontSize:   '32px',
             fill:       '#ffffff',
