@@ -20,9 +20,7 @@ class RoomScene extends Phaser.Scene {
         this._isAwakening = true;
 
         this._buildBackground();
-        this._buildPerfumeEasterEgg();
 
-        // 캐릭터 배경 자동 제거 (회색 → 투명)
         removeBgFromTexture(this, 'char_male',   'char_male_nobg');
         removeBgFromTexture(this, 'char_female', 'char_female_nobg');
         this._createCharacters();
@@ -202,46 +200,6 @@ class RoomScene extends Phaser.Scene {
     }
 
     // -------------------------------------------------------------------------
-
-    _buildPerfumeEasterEgg() {
-        if (!this.textures.exists('perfume')) return;
-
-        const pos = GAME_CONFIG.POSITIONS.room.perfume;
-        const spr = this.add.image(pos.x, pos.y, 'perfume')
-            .setDepth(15).setScale(0.5)
-            .setInteractive({ useHandCursor: true });
-
-        this.tweens.add({
-            targets: spr, alpha: 0.55, duration: 1800,
-            yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
-        });
-
-        spr.on('pointerover', () => {
-            spr.setTint(0xffffaa).setAlpha(1);
-            this.tweens.getTweensOf(spr).forEach(t => t.pause());
-        });
-        spr.on('pointerout', () => {
-            spr.clearTint();
-            this.tweens.getTweensOf(spr).forEach(t => t.resume());
-        });
-        spr.on('pointerdown', (pointer, lx, ly, event) => {
-            event.stopPropagation();
-            if (this.dialog.isActive) return;
-            const cfg = GAME_CONFIG.ASSETS.audio.perfume_voice;
-            let voice = null;
-            if (this.cache.audio.exists(cfg.key)) {
-                voice = this.sound.add(cfg.key, { volume: cfg.volume });
-                voice.play();
-            }
-            this.dialog.start(
-                GAME_CONFIG.DIALOGUES.room_perfume,
-                () => { if (voice && voice.isPlaying) voice.stop(); },
-                (s) => this._onSpeakerChange(s)
-            );
-        });
-    }
-
-    // 대화 종료 후 좌상단에 이동 버튼 표시
     _showMoveButton(label, onTap) {
         const btn = this.add.text(18, 24, `🚶 ${label}`, {
             fontFamily:      'sans-serif',

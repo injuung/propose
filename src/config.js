@@ -71,14 +71,15 @@ const GAME_CONFIG = {
         },
 
         objects: {
-            perfume:      { key: 'perfume',      url: '', driveId: '' },
-            fridge_photo: { key: 'fridge_photo', url: '', driveId: '' },
-
-            // ★ 냉장고 사진 클릭 시 전체화면에 표시될 사진
-            //   url 또는 driveId 중 하나를 채워 넣으세요
+            fridge_photo:  { key: 'fridge_photo',  url: '', driveId: '' },
             fridge_memory: {
                 key:     'fridge_memory',
-                url:     '',        // 예: 'assets/photos/memory.png'
+                url:     '',
+                driveId: '',
+            },
+            ring: {
+                key:     'ring',
+                url:     '',        // 예: 'assets/objects/ring.png'
                 driveId: '',        // 또는 Google Drive 파일 ID
             },
         },
@@ -149,7 +150,7 @@ const GAME_CONFIG = {
         // Stage 1 (침실) — 마지막 줄 후 부엌 이동
         room_intro: [
             { text: "자기야, 할 말이 있어❤️", speaker: 'male' },
-            { text: "응? 뭔데, 왜 이렇게 진지해~", speaker: 'female' },
+            { text: "응? 뭔데", speaker: 'female' },
             { text: "이 방에서 매일 아침 같이 눈뜨면서 행복하게 하루를 시작하고, 고단했던 하루 끝에는 서로 꼭 안아주면서 행복하게 마무리할 수 있게 내가 노력할게. 언제나 우리 그렇게 같이 살자.", speaker: 'male' },
             { text: "와... 고마워. 그렇게 말해주니까 매일 하루의 시작이랑 끝이 다 든든하겠다. 우리 진짜 예쁘게 잘 살자.", speaker: 'female' },
             { text: "어머, 나 잠투정 엄청 심한데 다 감당할 수 있겠어?", speaker: 'female' },
@@ -163,8 +164,8 @@ const GAME_CONFIG = {
         kitchen_intro: [
             { text: "우와, 로티세리 치킨 진짜 맛있겠다! 자기야, 이 로티세리처럼 자기가 먹고 싶은 요리는 내가 언제든 맛있게 요리해 줄 거야.", speaker: 'male' },
             { text: "행복한 날에는 맛있는 음식 먹으면서 더 많이 웃고, 슬프거나 다투는 날이 있더라도 내가 만든 안주에 가볍게 한잔하면서 다 대화로 풀어낼 수 있게 노력할게. 음식을 핑계 삼아서 우리 늘 대화로 풀자.", speaker: 'male' },
-            { text: "좋지! 어떤 날이든 맛있는 거 먹으면서 항상 대화로 풀자. 나도 서운한 거 쌓아두지 않을게.", speaker: 'female' },
-            { text: "응, 내가 먼저 손 내밀고 노력할게. 아, 맞다! 오늘 중요한 야구 경기 있지 않아? 얼른 거실 넘어가서 보자.", speaker: 'male' },
+            { text: "좋지! 어떤 날이든 맛있는 거 먹으면서 항상 대화를 많이 하자!", speaker: 'female' },
+            { text: "응, 내가 먼저 어떤일이든 자기에게 공유하고 다 알려줄게. 아, 맞다! 오늘 중요한 야구 경기 있지 않아? 얼른 거실 넘어가서 보자.", speaker: 'male' },
             { text: "앗, 맞다 오늘 경기 있지! 얼른 TV 켜자, 거실로 가자!", speaker: 'female' },
         ],
 
@@ -174,10 +175,8 @@ const GAME_CONFIG = {
             { text: "지금 몇 대 몇이려나~ 내가 켤게!", speaker: 'female' },
         ],
 
-        // 이스터에그: 향수
-        room_perfume: [
-            { text: "이 향수 냄새... 처음 만났을 때랑 똑같아.", speaker: 'female' },
-        ],
+        // 이스터에그: 향수 (미사용)
+        // room_perfume: [],
 
     },
 
@@ -215,14 +214,19 @@ const GAME_CONFIG = {
         },
 
         living: {
-            // TV 화면 클릭 영역
-            // 대화 종료 후 이 영역을 탭하면 동영상 재생
-            // DEBUG_MODE: true 로 설정하면 영역이 빨간 선으로 표시됩니다
             tv_hotspot: {
                 x: Math.round(_W * 0.50),
                 y: Math.round(_H * 0.38),
-                w: Math.round(_W * 0.88),   // 좌우 여백 6% 씩만 남기고 넓게
-                h: Math.round(_H * 0.30),   // 높이도 충분히
+                w: Math.round(_W * 0.88),
+                h: Math.round(_H * 0.30),
+            },
+            // TV 오른쪽 화분·선반 영역 — 반지 이스터에그
+            // DEBUG_MODE: true 로 설정하면 영역이 초록 선으로 표시됩니다
+            ring_hotspot: {
+                x: Math.round(_W * 0.82),
+                y: Math.round(_H * 0.52),
+                w: Math.round(_W * 0.22),
+                h: Math.round(_H * 0.14),
             },
         },
 

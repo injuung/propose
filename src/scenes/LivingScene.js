@@ -12,6 +12,12 @@ class LivingScene extends Phaser.Scene {
             this.load.image('char_male', 'assets/characters/char_male.png');
         if (!this.textures.exists('char_female'))
             this.load.image('char_female', 'assets/characters/char_female.png');
+
+        const ringCfg = GAME_CONFIG.ASSETS.objects.ring;
+        if (ringCfg && !this.textures.exists(ringCfg.key)) {
+            const url = (typeof DriveUrl !== 'undefined') ? DriveUrl.resolve(ringCfg, 'image') : (ringCfg.url || '');
+            if (url) this.load.image(ringCfg.key, url);
+        }
     }
 
     create() {
@@ -19,6 +25,7 @@ class LivingScene extends Phaser.Scene {
 
         this._buildBackground();
         this._buildTVHotspot();
+        this._buildRingEasterEgg();
 
         removeBgFromTexture(this, 'char_male',   'char_male_nobg');
         removeBgFromTexture(this, 'char_female', 'char_female_nobg');
@@ -129,7 +136,87 @@ class LivingScene extends Phaser.Scene {
 
     // -------------------------------------------------------------------------
 
-    _buildTVHotspot() {
+    // -------------------------------------------------------------------------
+    // 반지 이스터에그
+    // -------------------------------------------------------------------------
+
+    _buildRingEasterEgg() {
+        const pos = GAME_CONFIG.POSITIONS.living.ring_hotspot;
+
+        const zone = this.add.zone(pos.x, pos.y, pos.w, pos.h)
+            .setDepth(21).setInteractive({ useHandCursor: true });
+
+        zone.on('pointerdown', (pointer, lx, ly, event) => {
+            event.stopPropagation();
+            if (!this.dialog.isActive) this._showRingModal();
+        });
+
+        if (GAME_CONFIG.DEBUG_MODE) {
+            this.add.rectangle(pos.x, pos.y, pos.w, pos.h)
+                .setDepth(99).setStrokeStyle(2, 0x00ff88, 1).setFillStyle(0x00ff88, 0.15);
+            this.add.text(pos.x, pos.y, '💍 반지', {
+                fontFamily: 'monospace', fontSize: '13px', fill: '#00ff88',
+                backgroundColor: '#000000aa', padding: { x: 5, y: 3 },
+            }).setOrigin(0.5).setDepth(100);
+        }
+    }
+
+    _showRingModal() {
+        const { WIDTH, HEIGHT } = GAME_CONFIG;
+        const ringCfg = GAME_CONFIG.ASSETS.objects.ring;
+        const hasRing = ringCfg && this.textures.exists(ringCfg.key);
+
+        const overlay = this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 0x000000, 0.92)
+            .setDepth(90).setInteractive();
+
+        const items = [overlay];
+
+        if (hasRing) {
+            const img = this.add.image(WIDTH / 2, HEIGHT * 0.44, ringCfg.key).setDepth(91).setAlpha(0);
+            const src = this.textures.get(ringCfg.key).getSourceImage();
+            const maxW = WIDTH  * 0.72;
+            const maxH = HEIGHT * 0.48;
+            img.setScale(Math.min(maxW / src.width, maxH / src.height));
+            this.tweens.add({ targets: img, alpha: 1, duration: 450, ease: 'Sine.easeOut' });
+            items.push(img);
+        } else {
+            const ring = this.add.text(WIDTH / 2, HEIGHT * 0.38, '💍', {
+                fontSize: Math.round(WIDTH * 0.28) + 'px',
+            }).setOrigin(0.5).setDepth(91).setAlpha(0);
+            this.tweens.add({ targets: ring, alpha: 1, duration: 450, ease: 'Sine.easeOut' });
+            items.push(ring);
+        }
+
+        for (let i = 0; i < 6; i++) {
+            const star = this.add.text(
+                WIDTH * (0.2 + Math.random() * 0.6),
+                HEIGHT * (0.15 + Math.random() * 0.45),
+                '✦', {
+                fontSize: Math.round(WIDTH * 0.06) + 'px',
+                fill: '#f1c40f',
+            }).setOrigin(0.5).setDepth(92).setAlpha(0);
+            this.tweens.add({
+                targets: star, alpha: 0.9,
+                delay: 300 + i * 120, duration: 500,
+                yoyo: true, repeat: -1,
+            });
+            items.push(star);
+        }
+
+        const hint = this.add.text(WIDTH / 2, HEIGHT - 55, '화면을 탭하면 닫힙니다', {
+            fontFamily: 'sans-serif', fontSize: '15px', fill: '#888888',
+        }).setOrigin(0.5).setDepth(92);
+        items.push(hint);
+
+        overlay.once('pointerdown', () => {
+            this.tweens.add({
+                targets: items, alpha: 0, duration: 220,
+                onComplete: () => items.forEach(o => o.destroy()),
+            });
+        });
+    }
+
+    // -------------------------------------------------------------------------
         const pos = GAME_CONFIG.POSITIONS.living.tv_hotspot;
 
         const tvZone = this.add.zone(pos.x, pos.y, pos.w, pos.h)
