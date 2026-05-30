@@ -20,52 +20,56 @@ class BootScene extends Phaser.Scene {
         // 어두운 오버레이
         this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 0x000000, 0.55);
 
-        // 이름 + 하트
-        const nameObj = this.add.text(WIDTH / 2, HEIGHT * 0.30, '정문 ♥', {
+        // 메인 타이틀
+        const titleObj = this.add.text(WIDTH / 2, HEIGHT * 0.32, '우리의\n행복한 시작', {
             fontFamily:      'serif',
-            fontSize:        Math.round(WIDTH * 0.115) + 'px',
-            fill:            '#ffaabb',
-            fontStyle:       'bold',
+            fontSize:        Math.round(WIDTH * 0.11) + 'px',
+            fill:            '#ffffff',
+            fontStyle:       'italic bold',
             stroke:          '#000000',
             strokeThickness: 4,
-            shadow:          { offsetX: 0, offsetY: 2, color: '#ff6688', blur: 12, fill: true },
+            lineSpacing:     14,
+            align:           'center',
+            shadow:          { offsetX: 0, offsetY: 3, color: '#aaaaff', blur: 14, fill: true },
         }).setOrigin(0.5).setAlpha(0);
 
-        // 서브 대사 (타이핑 효과)
-        const subText = this.add.text(WIDTH / 2, HEIGHT * 0.50, '', {
+        // 서브 문구
+        const subText = this.add.text(WIDTH / 2, HEIGHT * 0.58, '', {
             fontFamily:  'serif',
-            fontSize:    Math.round(WIDTH * 0.065) + 'px',
-            fill:        '#ffffff',
+            fontSize:    Math.round(WIDTH * 0.058) + 'px',
+            fill:        '#f1c40f',
             fontStyle:   'italic',
             stroke:      '#000000',
-            strokeThickness: 3,
-            lineSpacing: 10,
+            strokeThickness: 2,
+            letterSpacing: 4,
             align:       'center',
         }).setOrigin(0.5).setAlpha(0);
 
         // 시작 버튼 (처음엔 숨김)
-        const btn = this._createStartButton(WIDTH / 2, HEIGHT * 0.70);
+        const btn = this._createStartButton(WIDTH / 2, HEIGHT * 0.74);
         btn.setAlpha(0);
 
-        // 연출 순서: 페이드인 → 이름 등장 → 타이핑 → 버튼 등장
-        this.cameras.main.fadeIn(800, 0, 0, 0);
+        // 연출 순서: 페이드인 → 타이틀 등장 → Coming Soon 타이핑 → 버튼 등장
+        this.cameras.main.fadeIn(1000, 0, 0, 0);
 
-        this.time.delayedCall(600, () => {
+        this.time.delayedCall(700, () => {
             this.tweens.add({
-                targets: nameObj, alpha: 1, y: HEIGHT * 0.28,
-                duration: 700, ease: 'Back.easeOut',
+                targets: titleObj, alpha: 1, y: HEIGHT * 0.30,
+                duration: 800, ease: 'Sine.easeOut',
                 onComplete: () => {
-                    subText.setAlpha(1);
-                    this._typewrite(subText, '할말이 있어...', 80, () => {
-                        this.time.delayedCall(400, () => {
-                            this.tweens.add({
-                                targets: btn, alpha: 1, duration: 500,
-                                onComplete: () => {
-                                    this.tweens.add({
-                                        targets: btn, alpha: 0.6,
-                                        duration: 900, yoyo: true, repeat: -1,
-                                    });
-                                },
+                    this.time.delayedCall(300, () => {
+                        subText.setAlpha(1);
+                        this._typewrite(subText, '— Coming Soon —', 70, () => {
+                            this.time.delayedCall(500, () => {
+                                this.tweens.add({
+                                    targets: btn, alpha: 1, duration: 500,
+                                    onComplete: () => {
+                                        this.tweens.add({
+                                            targets: btn, alpha: 0.6,
+                                            duration: 900, yoyo: true, repeat: -1,
+                                        });
+                                    },
+                                });
                             });
                         });
                     });
