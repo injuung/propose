@@ -123,28 +123,37 @@ const GAME_CONFIG = {
     // =========================================================================
     DIALOGUES: {
 
+        // Stage 1 (침실) — 눈 뜨기 전 깨우기 → 밝아진 뒤 본 대화
+        room_wake: [
+            { text: "자기야, 일어나", speaker: 'male' },
+        ],
+
         // Stage 1 (침실) — 마지막 줄 후 부엌 이동
         room_intro: [
-            { text: "오늘 하루도 수고했어.",                    speaker: 'male'   },
-            { text: "응... 네 옆에 누워있으니까 다 풀린다.",    speaker: 'female' },
-            { text: "우리 이렇게 매일 같이 있을 수 있으면 좋겠다.", speaker: 'male' },
-            { text: "나도.",                                    speaker: 'female' },
-            { text: "이제 밥먹으러 가자.",                     speaker: 'male'   },
+            { text: "매일 아침 눈떴을 때 가장 먼저 보이는 사람이 나였으면 좋겠어. 세상에서 가장 행복한 아침을 매일 너에게 선물할게. 내 모든 내일을 너와 함께하고 싶어.", speaker: 'male'   },
+            { text: "그럼 매일 아침 일어날 때마다 기분 좋겠네. 우리 진짜 예쁘게 잘 살자.", speaker: 'female' },
+            { text: "말만 그렇게 하는 게 아니라, 눈뜨자마자 세상에서 제일 다정하게 안아주면서 깨워줄 거야. 기대해도 좋아.", speaker: 'male' },
+            { text: "우와, 나 잠투정 진짜 심한데 감당할 수 있겠어? 약속 꼭 지켜!", speaker: 'female' },
+            { text: "너 잠투정 부리는 것도 나한테는 그냥 귀여울 뿐이야. 평생 다 받아줄 테니까 넌 내 옆에서 편하게 잠들기만 해.", speaker: 'male' },
+            { text: "알았어, 믿어볼게. 멋진 남편이 될 준비가 벌써 다 됐네?", speaker: 'female' },
+            { text: "당연하지. 자, 그럼 백점 만점 남편이 되는 첫걸음으로 오늘 아침은 내가 먼저 에스코트해 줄게. 나가볼까?", speaker: 'male' },
+            { text: "치, 성격도 급해라. 그래, 우리 이제 밖으로 나가보자!", speaker: 'female' },
         ],
 
         // Stage 2 (부엌) — 마지막 줄 후 거실 이동
         kitchen_intro: [
-            { text: "오늘은 내가 해줄게.",            speaker: 'male'   },
-            { text: "진짜? 뭐 만들어줄 거야?",       speaker: 'female' },
-            { text: "네가 좋아하는 거.",              speaker: 'male'   },
-            { text: "맛있겠다. 역시 네가 최고야.",    speaker: 'female' },
-            { text: "다 됐어. 어때?",                 speaker: 'male'   },
-            { text: "야구볼래?",                      speaker: 'female' },
+            { text: "주말이나 평소에 네가 맛있는 거 먹고 싶다고 하면 언제든 해줄게. 마주 앉아서 그냥 그날 있었던 일들 이런저런 얘기 나누면서 보내고 싶어.", speaker: 'male'   },
+            { text: "와, 진짜지? 그럼 난 맛있게 먹고 설거지 담당할게!", speaker: 'female' },
+            { text: "살다 보면 서운한 날도 있겠지만, 그럴 땐 여기 식탁에서 술 한잔 가볍게 하면서 풀자. 내가 먼저 대화하자고 손 내밀게.", speaker: 'male' },
+            { text: "그래, 서로 솔직하게 얘기하면 금방 풀리니까. 서운한 거 쌓아두지 말고 바로바로 말하자.", speaker: 'female' },
+            { text: "응, 내가 더 노력할게. 맛있는 것도 먹었으니까 이제 거실로 넘어가서 야구 볼까? 오늘 중요한 경기 있잖아.", speaker: 'male' },
+            { text: "앗, 맞다 오늘 경기 있지! 얼른 TV 켜자, 거실로 가자!", speaker: 'female' },
         ],
 
         // Stage 3 (거실) — TV 힌트
         living_hint: [
-            { text: "저기... TV 한번 켜볼래?", speaker: 'female' },
+            { text: "아, 맞다! 경기 벌써 시작했겠다. 얼른 TV 켜서 야구 보자. 저기 TV 좀 눌러볼래?", speaker: 'male'   },
+            { text: "지금 몇 대 몇이려나? 응, 내가 켤게!", speaker: 'female' },
         ],
 
         // 이스터에그: 향수

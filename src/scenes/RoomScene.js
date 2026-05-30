@@ -1,6 +1,6 @@
 // =============================================================================
 // RoomScene.js : Stage 1 - 침실
-// 흐름: 씬 입장 → 탭 힌트 → 대사 (캐릭터 전신 표시) → 부엌 이동 버튼
+// 흐름: 어두운 화면 → 탭 → "자기야, 일어나" → 밝아짐 → 본 대사 → 부엌 이동
 // =============================================================================
 class RoomScene extends Phaser.Scene {
     constructor() { super('RoomScene'); }
@@ -17,6 +17,8 @@ class RoomScene extends Phaser.Scene {
     create() {
         const { WIDTH, HEIGHT } = GAME_CONFIG;
 
+        this._isAwakening = true;
+
         this._buildBackground();
         this._buildPerfumeEasterEgg();
 
@@ -28,6 +30,10 @@ class RoomScene extends Phaser.Scene {
         this.dialog = new DialogSystem(this);
         new NavigationUI(this);
 
+        // 잠에서 깨어나는 연출: 검은 화면 위에서 시작
+        this._darkOverlay = this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 0x000000, 1)
+            .setDepth(95);
+
         this._tapHint = this.add.text(WIDTH / 2, HEIGHT * 0.44, '화면을 탭하여 시작하세요', {
             fontFamily:      'sans-serif',
             fontSize:        '21px',
@@ -36,19 +42,14 @@ class RoomScene extends Phaser.Scene {
             strokeThickness: 5,
             backgroundColor: '#00000099',
             padding:         { x: 16, y: 10 },
-        }).setOrigin(0.5).setDepth(55).setAlpha(0);
+        }).setOrigin(0.5).setDepth(96).setAlpha(0);
 
-        this.cameras.main.fadeIn(300, 0, 0, 0);
         this.time.delayedCall(350, () => this._showTapHint());
 
         this.input.once('pointerdown', () => {
             this.tweens.killTweensOf(this._tapHint);
             this._tapHint.setVisible(false);
-            this.dialog.start(
-                GAME_CONFIG.DIALOGUES.room_intro,
-                () => this._showMoveButton('부엌으로 이동 →', () => this._goToKitchen()),
-                (s) => this._onSpeakerChange(s)
-            );
+            this._startWakeDialogue();
         });
 
         this.input.on('pointerdown', () => this.dialog.advance());
@@ -68,11 +69,47 @@ class RoomScene extends Phaser.Scene {
         });
     }
 
+    _startWakeDialogue() {
+        this.dialog.start(
+            GAME_CONFIG.DIALOGUES.room_wake,
+            () => this._brightenAndStartIntro(),
+            () => {}
+        );
+    }
+
+    _brightenAndStartIntro() {
+        this.tweens.add({
+            targets:  this._darkOverlay,
+            alpha:    0,
+            duration: 2200,
+            ease:     'Sine.easeOut',
+            onComplete: () => {
+                this._darkOverlay.destroy();
+                this._darkOverlay = null;
+                this._isAwakening = false;
+                this.dialog.start(
+                    GAME_CONFIG.DIALOGUES.room_intro,
+                    () => this._showMoveButton('부엌으로 이동 →', () => this._goToKitchen()),
+                    (s) => this._onSpeakerChange(s)
+                );
+            },
+        });
+
+        if (this._morningGlow) {
+            this.tweens.add({
+                targets:  this._morningGlow,
+                alpha:    0.10,
+                duration: 2200,
+                ease:     'Sine.easeOut',
+            });
+        }
+    }
+
     _buildBackground() {
         const { WIDTH, HEIGHT } = GAME_CONFIG;
         this.add.image(WIDTH / 2, HEIGHT / 2, 'bg_room')
             .setDepth(0).setDisplaySize(WIDTH, HEIGHT);
-        this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 0xffffff, 0.08)
+        this._morningGlow = this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 0xfff8e8, 0)
             .setDepth(1);
     }
 
@@ -137,6 +174,7 @@ class RoomScene extends Phaser.Scene {
 
     _onSpeakerChange(speaker) {
         if (!this._charFemale || !this._charMale) return;
+        if (this._isAwakening) return;
         if (speaker === null) {
             this.tweens.add({
                 targets:  [this._charFemale.root, this._charMale.root],
