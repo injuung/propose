@@ -50,9 +50,11 @@ class RoomScene extends Phaser.Scene {
             this.tweens.killTweensOf(this._tapHint);
             this._tapHint.setVisible(false);
             this._startWakeDialogue();
+            // 첫 탭이 advance()도 동시에 발동하지 않도록 한 프레임 뒤에 연결
+            this.time.delayedCall(50, () => {
+                this.input.on('pointerdown', () => this.dialog.advance());
+            });
         });
-
-        this.input.on('pointerdown', () => this.dialog.advance());
 
         if (GAME_CONFIG.DEBUG_MODE) this._buildDebugUI();
     }
@@ -70,9 +72,15 @@ class RoomScene extends Phaser.Scene {
     }
 
     _startWakeDialogue() {
+        // 대사창을 어두운 오버레이(depth 95) 위로 올림
+        this.dialog.container.setDepth(97);
+
         this.dialog.start(
             GAME_CONFIG.DIALOGUES.room_wake,
-            () => this._brightenAndStartIntro(),
+            () => {
+                this.dialog.container.setDepth(50);
+                this._brightenAndStartIntro();
+            },
             () => {}
         );
     }
