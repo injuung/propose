@@ -20,6 +20,24 @@ const GAME_CONFIG = {
     HEIGHT: _H,
 
     // =========================================================================
+    // [UI 레이아웃] — 화면 크기에 따라 대화창·하단 네비 자동 조절
+    // =========================================================================
+    UI: {
+        NAV_BAR: {
+            HEIGHT:     Math.round(Math.max(56, Math.min(72, _H * 0.076))),
+            BOTTOM_PAD: Math.round(Math.max(8,  _H * 0.012)),
+        },
+        DIALOG: {
+            TYPE_DELAY_MS: 58,
+            FONT_SIZE:     Math.round(Math.max(13, Math.min(16, _W * 0.034))),
+            NAME_FONT_SIZE: Math.round(Math.max(10, Math.min(12, _W * 0.028))),
+            LINE_SPACING:  3,
+            BOX_HEIGHT:    Math.round(Math.max(96, Math.min(118, _H * 0.125))),
+            GAP_ABOVE_NAV: 12,
+        },
+    },
+
+    // =========================================================================
     // [에셋 설정]
     // ★ driveId 와 url 중 하나만 입력
     //   driveId : Google Drive 파일 ID  (url 은 '' 로 비워두기)

@@ -12,18 +12,20 @@ class NavigationUI {
     }
 
     _build() {
-        const { WIDTH, HEIGHT } = GAME_CONFIG;
+        const { WIDTH, HEIGHT, UI } = GAME_CONFIG;
         const currentScene = this.scene.scene.key;
+        const navH     = UI.NAV_BAR.HEIGHT;
+        const navPad   = UI.NAV_BAR.BOTTOM_PAD;
+        const y        = HEIGHT - navPad - navH / 2;
+        const fontSize = Math.round(Math.max(16, Math.min(22, WIDTH * 0.048)));
 
         const btnCount = NavigationUI.SCENES.length;
-        const btnWidth = (WIDTH - 16) / btnCount - 10; // 각 버튼 너비
+        const btnWidth = (WIDTH - 16) / btnCount - 10;
         const gapX     = 10;
         const totalW   = btnCount * btnWidth + (btnCount - 1) * gapX;
         const startX   = (WIDTH - totalW) / 2 + btnWidth / 2;
-        const y        = HEIGHT - 38;  // 902px
 
-        // 배경 바
-        this.scene.add.rectangle(WIDTH / 2, y, WIDTH, 72, 0x000000, 0.80)
+        this.scene.add.rectangle(WIDTH / 2, y, WIDTH, navH, 0x000000, 0.80)
             .setDepth(60);
 
         NavigationUI.SCENES.forEach((sceneName, i) => {
@@ -31,15 +33,14 @@ class NavigationUI {
             const x = startX + i * (btnWidth + gapX);
 
             const btn = this.scene.add.text(x, y, NavigationUI.LABELS[i], {
-                fontSize:        '22px',
+                fontSize:        `${fontSize}px`,
                 fontFamily:      'sans-serif',
                 fill:            isActive ? '#f1c40f' : '#888888',
                 fontStyle:       isActive ? 'bold'   : 'normal',
             }).setOrigin(0.5).setDepth(61);
 
             if (isActive) {
-                // 활성 씬 밑줄
-                this.scene.add.rectangle(x, y + 20, btnWidth - 10, 3, 0xf1c40f)
+                this.scene.add.rectangle(x, y + navH / 2 - 10, btnWidth - 10, 3, 0xf1c40f)
                     .setDepth(62);
             } else {
                 btn.setInteractive({ useHandCursor: true });

@@ -18,7 +18,19 @@ class DialogSystem {
         this.onSpeakerChange = null;
         this.lines           = [];
 
+        this._layout = this._calcLayout();
         this._buildUI();
+    }
+
+    _calcLayout() {
+        const { WIDTH, HEIGHT, UI } = GAME_CONFIG;
+        const dlg = UI.DIALOG;
+        const nav = UI.NAV_BAR;
+        const boxW = WIDTH - 16;
+        const boxH = dlg.BOX_HEIGHT;
+        const posY = HEIGHT - nav.BOTTOM_PAD - nav.HEIGHT - dlg.GAP_ABOVE_NAV - boxH / 2;
+
+        return { boxW, boxH, posY, dlg };
     }
 
     // -------------------------------------------------------------------------
@@ -52,46 +64,39 @@ class DialogSystem {
     // -------------------------------------------------------------------------
 
     _buildUI() {
-        const { WIDTH, HEIGHT } = GAME_CONFIG;
-        const boxW = WIDTH - 16;   // 좌우 여백 최소화
-        const boxH = 130;          // 높이 최소화 (잘림 없이)
-        const posY = HEIGHT * 0.83; // 화면 하단 가까이
+        const { WIDTH } = GAME_CONFIG;
+        const { boxW, boxH, posY, dlg } = this._layout;
 
         this.container = this.scene.add.container(WIDTH / 2, posY)
             .setDepth(50).setVisible(false);
 
-        // --- 배경 박스 ---
         this._bg = this.scene.add.graphics();
         this._drawBox(this._bg, boxW, boxH);
 
-        // --- 발화자 이름 라벨 (평소엔 숨김) ---
         this._nameLabel = this.scene.add.text(
-            -boxW / 2 + 14, -boxH / 2 + 8, '', {
+            -boxW / 2 + 12, -boxH / 2 + 6, '', {
             fontFamily:      'sans-serif',
-            fontSize:        '13px',
+            fontSize:        `${dlg.NAME_FONT_SIZE}px`,
             fontStyle:       'bold',
             fill:            '#f1c40f',
             stroke:          '#000000',
-            strokeThickness: 3,
+            strokeThickness: 2,
         }).setVisible(false);
 
-        // --- 구분선 (발화자 이름 아래) ---
         this._divider = this.scene.add.graphics();
 
-        // --- 대사 텍스트 ---
         this.textObj = this.scene.add.text(
-            -boxW / 2 + 14, -boxH / 2 + 14, '', {
+            -boxW / 2 + 12, -boxH / 2 + 12, '', {
             fontFamily:  'sans-serif',
-            fontSize:    '18px',
+            fontSize:    `${dlg.FONT_SIZE}px`,
             fill:        '#ffffff',
-            wordWrap:    { width: boxW - 30 },
-            lineSpacing: 4,
+            wordWrap:    { width: boxW - 24 },
+            lineSpacing: dlg.LINE_SPACING,
         });
 
-        // --- ▼ 다음 아이콘 ---
         this.nextIcon = this.scene.add.text(
-            boxW / 2 - 18, boxH / 2 - 16, '▼', {
-            fontSize: '16px',
+            boxW / 2 - 16, boxH / 2 - 14, '▼', {
+            fontSize: `${Math.max(12, dlg.FONT_SIZE - 2)}px`,
             fill:     '#f1c40f',
         }).setOrigin(0.5);
 
@@ -110,9 +115,9 @@ class DialogSystem {
     _drawBox(g, boxW, boxH) {
         g.clear();
         g.fillStyle(0x000000, 0.88);
-        g.fillRoundedRect(-boxW / 2, -boxH / 2, boxW, boxH, 16);
-        g.lineStyle(2.5, 0xf1c40f, 0.95);
-        g.strokeRoundedRect(-boxW / 2, -boxH / 2, boxW, boxH, 16);
+        g.fillRoundedRect(-boxW / 2, -boxH / 2, boxW, boxH, 14);
+        g.lineStyle(2, 0xf1c40f, 0.95);
+        g.strokeRoundedRect(-boxW / 2, -boxH / 2, boxW, boxH, 14);
     }
 
     // -------------------------------------------------------------------------
@@ -139,15 +144,13 @@ class DialogSystem {
     }
 
     _updateSpeakerLabel(speaker) {
-        const { WIDTH } = GAME_CONFIG;
-        const boxW  = WIDTH - 16;
-        const boxH  = 130;
+        const { boxW, boxH } = this._layout;
 
         this._divider.clear();
 
         if (!speaker || !GAME_CONFIG.SPEAKERS || !GAME_CONFIG.SPEAKERS[speaker]) {
             this._nameLabel.setVisible(false);
-            this.textObj.setPosition(-boxW / 2 + 14, -boxH / 2 + 14);
+            this.textObj.setPosition(-boxW / 2 + 12, -boxH / 2 + 12);
             return;
         }
 
@@ -155,22 +158,19 @@ class DialogSystem {
         const nameColor = speaker === 'male' ? '#88ccff' : '#ffaabb';
         const lineColor = speaker === 'male' ? 0x88ccff   : 0xffaabb;
 
-        // 이름 라벨
         this._nameLabel
-            .setPosition(-boxW / 2 + 14, -boxH / 2 + 8)
+            .setPosition(-boxW / 2 + 12, -boxH / 2 + 6)
             .setText(cfg.name)
             .setStyle({ fill: nameColor })
             .setVisible(true);
 
-        // 구분선
         this._divider.lineStyle(1, lineColor, 0.4);
         this._divider.lineBetween(
-            -boxW / 2 + 10, -boxH / 2 + 30,
-             boxW / 2 - 10, -boxH / 2 + 30
+            -boxW / 2 + 8, -boxH / 2 + 26,
+             boxW / 2 - 8, -boxH / 2 + 26
         );
 
-        // 텍스트를 이름 아래로 내림
-        this.textObj.setPosition(-boxW / 2 + 14, -boxH / 2 + 36);
+        this.textObj.setPosition(-boxW / 2 + 12, -boxH / 2 + 30);
     }
 
     _typewrite(text) {
@@ -180,9 +180,10 @@ class DialogSystem {
         this.nextIcon.setVisible(false);
         if (this.typeTimer) this.typeTimer.remove();
 
+        const delay = GAME_CONFIG.UI.DIALOG.TYPE_DELAY_MS;
         let i = 0;
         this.typeTimer = this.scene.time.addEvent({
-            delay:  40,
+            delay,
             repeat: text.length - 1,
             callback: () => {
                 this.textObj.text += text[i++];
