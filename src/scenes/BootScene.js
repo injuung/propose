@@ -1,5 +1,5 @@
 // =============================================================================
-// BootScene.js : 타이틀 화면 — 갤럭시 S24 세로(450×940) 기준
+// BootScene.js : 타이틀 화면 — 정문의 "할말이 있어" 도입부
 // =============================================================================
 class BootScene extends Phaser.Scene {
     constructor() { super('BootScene'); }
@@ -11,52 +11,93 @@ class BootScene extends Phaser.Scene {
     create() {
         const { WIDTH, HEIGHT } = GAME_CONFIG;
 
-        // 가로 사진을 세로 화면에 cover 방식으로 표시
+        // 배경
         const bg = this.add.image(WIDTH / 2, HEIGHT / 2, 'bg_title');
         const scaleX = WIDTH  / bg.width;
         const scaleY = HEIGHT / bg.height;
         bg.setScale(Math.max(scaleX, scaleY));
 
         // 어두운 오버레이
-        this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 0x000000, 0.50);
+        this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 0x000000, 0.55);
 
-        // 타이틀 (2줄)
-        this.add.text(WIDTH / 2, HEIGHT * 0.32, '우리가 함께하는\n새로운 시작', {
+        // 이름 + 하트
+        this.add.text(WIDTH / 2, HEIGHT * 0.30, '정문 ♥', {
             fontFamily:      'serif',
-            fontSize:        '32px',
-            fill:            '#ffffff',
-            fontStyle:       'italic',
-            align:           'center',
+            fontSize:        Math.round(WIDTH * 0.115) + 'px',
+            fill:            '#ffaabb',
+            fontStyle:       'bold',
             stroke:          '#000000',
             strokeThickness: 4,
-            lineSpacing:     12,
-        }).setOrigin(0.5);
+            shadow:          { offsetX: 0, offsetY: 2, color: '#ff6688', blur: 12, fill: true },
+        }).setOrigin(0.5).setAlpha(0);
 
-        // 서브 문구
-        this.add.text(WIDTH / 2, HEIGHT * 0.50, '♡', {
-            fontFamily: 'serif',
-            fontSize:   '32px',
-            fill:       '#ffcccc',
-        }).setOrigin(0.5);
+        // 서브 대사 (타이핑 효과)
+        const subText = this.add.text(WIDTH / 2, HEIGHT * 0.50, '', {
+            fontFamily:  'serif',
+            fontSize:    Math.round(WIDTH * 0.065) + 'px',
+            fill:        '#ffffff',
+            fontStyle:   'italic',
+            stroke:      '#000000',
+            strokeThickness: 3,
+            lineSpacing: 10,
+            align:       'center',
+        }).setOrigin(0.5).setAlpha(0);
 
-        this._createStartButton(WIDTH / 2, HEIGHT * 0.62);
+        // 시작 버튼 (처음엔 숨김)
+        const btn = this._createStartButton(WIDTH / 2, HEIGHT * 0.70);
+        btn.setAlpha(0);
 
-        this.cameras.main.fadeIn(700, 0, 0, 0);
+        // 연출 순서: 페이드인 → 이름 등장 → 타이핑 → 버튼 등장
+        this.cameras.main.fadeIn(800, 0, 0, 0);
+
+        const nameObj = this.children.list.find(c => c.text === '정문 ♥');
+        this.time.delayedCall(600, () => {
+            this.tweens.add({
+                targets: nameObj, alpha: 1, y: HEIGHT * 0.28,
+                duration: 700, ease: 'Back.easeOut',
+                onComplete: () => {
+                    subText.setAlpha(1);
+                    this._typewrite(subText, '할말이 있어...', 80, () => {
+                        this.time.delayedCall(400, () => {
+                            this.tweens.add({
+                                targets: btn, alpha: 1, duration: 500,
+                                onComplete: () => {
+                                    this.tweens.add({
+                                        targets: btn, alpha: 0.6,
+                                        duration: 900, yoyo: true, repeat: -1,
+                                    });
+                                },
+                            });
+                        });
+                    });
+                },
+            });
+        });
+    }
+
+    _typewrite(textObj, fullText, delay, onComplete) {
+        textObj.setText('');
+        let i = 0;
+        this.time.addEvent({
+            delay,
+            repeat: fullText.length - 1,
+            callback: () => {
+                textObj.text += fullText[i++];
+                if (i === fullText.length && onComplete) onComplete();
+            },
+        });
     }
 
     _createStartButton(x, y) {
+        const { WIDTH } = GAME_CONFIG;
+        const fontSize = Math.round(Math.max(18, Math.min(26, WIDTH * 0.060))) + 'px';
         const btn = this.add.text(x, y, '[ 시작하기 ]', {
             fontFamily:      'sans-serif',
-            fontSize:        '24px',
+            fontSize,
             fill:            '#f1c40f',
             backgroundColor: '#00000077',
             padding:         { x: 24, y: 12 },
         }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-
-        // 깜빡임
-        this.tweens.add({
-            targets: btn, alpha: 0.6, duration: 900, yoyo: true, repeat: -1,
-        });
 
         btn.on('pointerover', () => {
             this.tweens.killTweensOf(btn);
@@ -74,5 +115,7 @@ class BootScene extends Phaser.Scene {
                 this.scene.start('QuizScene');
             });
         });
+
+        return btn;
     }
 }
