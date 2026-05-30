@@ -21,7 +21,7 @@ class BootScene extends Phaser.Scene {
         this.add.rectangle(WIDTH / 2, HEIGHT / 2, WIDTH, HEIGHT, 0x000000, 0.55);
 
         // 이름 + 하트
-        this.add.text(WIDTH / 2, HEIGHT * 0.30, '정문 ♥', {
+        const nameObj = this.add.text(WIDTH / 2, HEIGHT * 0.30, '정문 ♥', {
             fontFamily:      'serif',
             fontSize:        Math.round(WIDTH * 0.115) + 'px',
             fill:            '#ffaabb',
@@ -50,7 +50,6 @@ class BootScene extends Phaser.Scene {
         // 연출 순서: 페이드인 → 이름 등장 → 타이핑 → 버튼 등장
         this.cameras.main.fadeIn(800, 0, 0, 0);
 
-        const nameObj = this.children.list.find(c => c.text === '정문 ♥');
         this.time.delayedCall(600, () => {
             this.tweens.add({
                 targets: nameObj, alpha: 1, y: HEIGHT * 0.28,
