@@ -1,0 +1,14 @@
+---
+description: 수정사항 발생 시 git 자동 커밋·푸시
+alwaysApply: true
+---
+
+# 자동 Git 저장
+
+이 프로젝트는 Cursor hook(`.cursor/hooks/auto-git.ps1`)으로 변경사항을 자동 커밋·푸시합니다.
+
+- **파일 수정 직후**: 8초 debounce 후 자동 저장
+- **에이전트 작업 완료 시**: 즉시 자동 저장
+
+에이전트는 작업을 마친 뒤 별도로 커밋을 요청받지 않아도 됩니다. hook이 처리합니다.
+`.env`, `credentials.json` 등 민감 파일은 자동 커밋에서 제외됩니다.

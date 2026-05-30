@@ -1,10 +1,16 @@
 {
   "version": 1,
   "hooks": {
+    "afterFileEdit": [
+      {
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/auto-git.ps1 -Debounced",
+        "timeout": 15
+      }
+    ],
     "stop": [
       {
-        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/auto-git.ps1",
-        "timeout": 30
+        "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .cursor/hooks/auto-git.ps1 -Immediate",
+        "timeout": 60
       }
     ]
   }
